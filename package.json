@@ -1,5 +1,4 @@
 {
-
   "name": "myn-coffee-roasters",
   "private": true,
   "version": "0.0.0",
@@ -8,7 +7,7 @@
     "dev": "vite",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
-    "build": "vite build",
+    "build": "vite build && node -e \"require('fs').writeFileSync('dist/.nojekyll', '')\"",
     "preview": "vite preview"
   },
   "dependencies": {
