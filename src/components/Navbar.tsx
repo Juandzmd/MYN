@@ -76,22 +76,29 @@ const Navbar: React.FC<NavbarProps> = ({ setView, cartCount, currentView }) => {
             </div>
 
             {/* Mobile Menu */}
-            <div className={`fixed inset-0 bg-myn-cream z-40 flex flex-col items-center justify-center transition-transform duration-300 ease-in-out md:hidden ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-                <div className="space-y-6 text-center">
-                    {navLinks.map(link => (
+            {/* Mobile Menu Overlay */}
+            <div
+                className={`fixed inset-0 z-40 bg-myn-cream/90 backdrop-blur-xl flex flex-col items-center justify-center transition-all duration-500 ease-out md:hidden 
+                ${isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'}`}
+            >
+                <div className="space-y-8 text-center">
+                    {navLinks.map((link, index) => (
                         <button
                             key={link.id}
                             onClick={() => { setView(link.id); setIsOpen(false); }}
-                            className={`block text-2xl font-serif font-bold transition-colors
-                            ${currentView === link.id ? 'text-myn-primary' : 'text-myn-dark hover:text-myn-primary'}`}
+                            className={`block text-3xl md:text-4xl font-serif font-bold transition-all duration-500 transform
+                            ${isOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}
+                            ${currentView === link.id ? 'text-myn-primary scale-110' : 'text-myn-dark hover:text-myn-primary hover:scale-105'}`}
+                            style={{ transitionDelay: `${index * 100}ms` }}
                         >
                             {link.label}
                         </button>
                     ))}
                 </div>
-                
-                <div className="absolute bottom-10 text-center">
-                     <p className="text-myn-primary text-xs font-bold uppercase tracking-widest">Myn Coffee Roasters</p>
+
+                <div className={`absolute bottom-12 text-center transition-all duration-700 delay-500 ${isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                    <div className="w-12 h-0.5 bg-myn-primary/30 mx-auto mb-4"></div>
+                    <p className="text-myn-primary text-xs font-bold uppercase tracking-[0.3em]">Myn Coffee Roasters</p>
                 </div>
             </div>
         </nav>
