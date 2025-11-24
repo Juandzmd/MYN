@@ -8,21 +8,16 @@ import GuidesView from './views/GuidesView';
 import WholesaleView from './views/WholesaleView';
 import { ViewState, Product } from './types';
 
+import { useToast } from './context/ToastContext';
+
 const App: React.FC = () => {
     const [currentView, setCurrentView] = useState<ViewState>('home');
     const [cart, setCart] = useState<Product[]>([]);
+    const { showToast } = useToast();
 
     const addToCart = (product: Product) => {
         setCart([...cart, product]);
-        // Basic user feedback - in a real app use a toast notification
-        const notification = document.createElement('div');
-        notification.className = 'fixed bottom-4 right-4 bg-myn-dark text-white px-6 py-3 rounded-lg shadow-xl z-50 animate-fade-in flex items-center gap-2';
-        notification.innerHTML = `<span>🌿 <strong>${product.name}</strong> añadido al carrito</span>`;
-        document.body.appendChild(notification);
-        setTimeout(() => {
-            notification.style.opacity = '0';
-            setTimeout(() => notification.remove(), 500);
-        }, 3000);
+        showToast(`🌿 ${product.name} añadido al carrito`);
     };
 
     const renderView = () => {
@@ -39,7 +34,7 @@ const App: React.FC = () => {
     return (
         <div className="min-h-screen flex flex-col font-sans text-myn-dark bg-myn-cream">
             <Navbar setView={setCurrentView} cartCount={cart.length} currentView={currentView} />
-            
+
             <main className="flex-grow">
                 {/* We key the view to force re-animation on route change if desired, 
                     or remove key to keep state if views were components holding state */}
