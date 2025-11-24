@@ -27,7 +27,7 @@ const Navbar: React.FC<NavbarProps> = ({ setView, cartCount, currentView }) => {
     }, []);
 
     return (
-        <nav className={`sticky top-0 z-50 transition-all duration-300 ${scrolled || isOpen ? 'bg-myn-cream/95 shadow-md py-3 backdrop-blur-md' : 'bg-myn-cream py-4 md:py-5'}`}>
+        <nav className={`sticky top-0 z-50 transition-all duration-300 ${isOpen ? 'bg-myn-cream py-3' : (scrolled ? 'bg-myn-cream/95 shadow-md py-3 backdrop-blur-md' : 'bg-myn-cream py-4 md:py-5')}`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center">
                     {/* Logo */}
