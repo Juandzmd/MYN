@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Coffee, Send, Loader2 } from 'lucide-react';
 import emailjs from '@emailjs/browser';
 import { useToast } from '../context/ToastContext';
@@ -7,8 +7,19 @@ const WholesaleView: React.FC = () => {
     const form = useRef<HTMLFormElement>(null);
     const [loading, setLoading] = useState(false);
     const { showToast } = useToast();
+
+    // Keys provided by user
+    const SERVICE_ID = 'service_41vkz2w';
+    const TEMPLATE_ID = 'template_ulifsik';
+    const PUBLIC_KEY = 'AetaTgfeC5F32gOkA';
+
+    useEffect(() => {
+        // Initialize EmailJS explicitly
+        emailjs.init(PUBLIC_KEY);
+    }, []);
+
     const [formData, setFormData] = useState({
-        user_name: '',
+        from_name: '', // Changed from user_name to match standard templates
         user_company: '',
         message: ''
     });
@@ -24,26 +35,31 @@ const WholesaleView: React.FC = () => {
         e.preventDefault();
         setLoading(true);
 
-        // NOTE: Service ID is missing. Using 'service_default' as placeholder.
-        // User needs to replace this with their actual Service ID from EmailJS.
-        const SERVICE_ID = 'service_41vkz2w';
-        const TEMPLATE_ID = 'template_ulifsik';
-        const PUBLIC_KEY = 'AetaTgfeC5F32gOkA';
-
-        if (!formData.user_name || !formData.message) {
+        if (!formData.from_name || !formData.message) {
             showToast('❌ Por favor completa los campos requeridos');
             setLoading(false);
             return;
         }
 
-        emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, form.current!, PUBLIC_KEY)
+        // Create a custom object to send, ensuring all data is included
+        // We append company to the message if the template doesn't have a specific field for it
+        const templateParams = {
+            from_name: formData.from_name,
+            user_company: formData.user_company,
+            message: `Empresa: ${formData.user_company || 'No especificada'}\n\nMensaje:\n${formData.message}`,
+            reply_to: 'no-reply@myncoffee.cl' // Optional
+        };
+
+        emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams)
             .then((result) => {
-                console.log(result.text);
+                console.log('SUCCESS!', result.status, result.text);
                 showToast('✅ ¡Mensaje enviado con éxito!');
-                setFormData({ user_name: '', user_company: '', message: '' });
+                setFormData({ from_name: '', user_company: '', message: '' });
             }, (error) => {
-                console.log(error.text);
-                showToast('❌ Error al enviar. Intenta nuevamente.');
+                console.error('FAILED...', error);
+                // Show the actual error message in the toast or alert for debugging
+                alert(`Error al enviar: ${JSON.stringify(error)}`);
+                showToast('❌ Error al enviar. Revisa la consola/alerta.');
             })
             .finally(() => {
                 setLoading(false);
@@ -80,8 +96,8 @@ const WholesaleView: React.FC = () => {
                             <label className="block text-xs uppercase tracking-wider font-bold text-gray-400 mb-1">Nombre de contacto</label>
                             <input
                                 type="text"
-                                name="user_name"
-                                value={formData.user_name}
+                                name="from_name"
+                                value={formData.from_name}
                                 onChange={handleChange}
                                 className="w-full p-3 bg-gray-50 border-b-2 border-gray-200 focus:border-myn-primary outline-none transition-colors placeholder-gray-300"
                                 placeholder="Ej. Juan Pérez"
