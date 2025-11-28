@@ -12,7 +12,7 @@ export interface NavLink {
   label: string;
 }
 
-export type ViewState = 'home' | 'shop' | 'subscription' | 'wholesale' | 'guides';
+export type ViewState = 'home' | 'shop' | 'subscription' | 'wholesale' | 'guides' | 'admin';
 
 export interface QuizOption {
   label: string;
