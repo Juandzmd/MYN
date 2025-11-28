@@ -78,7 +78,7 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
     return (
-        <Router>
+        <Router basename="/MYN">
             <AuthProvider>
                 <AppContent />
             </AuthProvider>

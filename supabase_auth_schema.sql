@@ -2,7 +2,12 @@
 create table profiles (
   id uuid references auth.users not null primary key,
   updated_at timestamp with time zone,
-  full_name text,
+  first_name text,
+  last_name text,
+  phone text,
+  region text,
+  commune text,
+  street_address text,
   role text default 'user' check (role in ('user', 'admin')),
   avatar_url text
 );
@@ -30,8 +35,28 @@ language plpgsql
 security definer set search_path = public
 as $$
 begin
-  insert into public.profiles (id, full_name, role, avatar_url)
-  values (new.id, new.raw_user_meta_data->>'full_name', 'user', new.raw_user_meta_data->>'avatar_url');
+  insert into public.profiles (
+    id, 
+    first_name, 
+    last_name, 
+    phone, 
+    region, 
+    commune, 
+    street_address, 
+    role, 
+    avatar_url
+  )
+  values (
+    new.id, 
+    new.raw_user_meta_data->>'first_name', 
+    new.raw_user_meta_data->>'last_name',
+    new.raw_user_meta_data->>'phone',
+    new.raw_user_meta_data->>'region',
+    new.raw_user_meta_data->>'commune',
+    new.raw_user_meta_data->>'street_address',
+    'user', 
+    new.raw_user_meta_data->>'avatar_url'
+  );
   return new;
 end;
 $$;

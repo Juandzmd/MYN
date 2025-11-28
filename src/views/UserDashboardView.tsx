@@ -11,7 +11,7 @@ const UserDashboardView: React.FC = () => {
                 <header className="flex justify-between items-center mb-10">
                     <div>
                         <h1 className="text-3xl md:text-4xl font-serif text-myn-dark mb-2">
-                            Hola, {profile?.full_name || user?.email?.split('@')[0]}
+                            Hola, {profile?.first_name || user?.email?.split('@')[0]}
                         </h1>
                         <p className="text-gray-600">Bienvenido a tu espacio personal del café.</p>
                     </div>
