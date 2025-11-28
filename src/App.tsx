@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import HomeView from './views/HomeView';
@@ -7,62 +8,81 @@ import SubscriptionView from './views/SubscriptionView';
 import GuidesView from './views/GuidesView';
 import WholesaleView from './views/WholesaleView';
 import AdminView from './views/AdminView';
-import { ViewState, Product } from './types';
+import LoginView from './views/LoginView';
+import UserDashboardView from './views/UserDashboardView';
+import ProtectedRoute from './components/ProtectedRoute';
+import { AuthProvider } from './context/AuthContext';
+import { Product } from './types';
 import { supabase } from './supabaseClient';
-
 import { useToast } from './context/ToastContext';
 
-const App: React.FC = () => {
-    const [currentView, setCurrentView] = useState<ViewState>('home');
+// Wrapper to handle location-based logic (like tracking visits)
+const AppContent: React.FC = () => {
     const [cart, setCart] = useState<Product[]>([]);
     const { showToast } = useToast();
+    const location = useLocation();
 
     useEffect(() => {
-        // Track visit on mount
+        // Track visit on route change
         const trackVisit = async () => {
             try {
-                await supabase.from('site_visits').insert([{ page: 'home_landing' }]);
+                await supabase.from('site_visits').insert([{ page: location.pathname }]);
             } catch (e) {
                 console.error('Error tracking visit:', e);
             }
         };
         trackVisit();
-    }, []);
+    }, [location]);
 
     const addToCart = (product: Product) => {
         setCart([...cart, product]);
         showToast(`🌿 ${product.name} añadido al carrito`);
     };
 
-    const renderView = () => {
-        switch (currentView) {
-            case 'home': return <HomeView setView={setCurrentView} addToCart={addToCart} />;
-            case 'shop': return <ShopView addToCart={addToCart} />;
-            case 'subscription': return <SubscriptionView />;
-            case 'wholesale': return <WholesaleView />;
-            case 'guides': return <GuidesView />;
-            case 'admin': return <AdminView />;
-            default: return <HomeView setView={setCurrentView} addToCart={addToCart} />;
-        }
-    };
+    // Helper to determine if we should show nav/footer
+    const isDashboard = location.pathname.startsWith('/admin') || location.pathname.startsWith('/dashboard');
 
     return (
         <div className="min-h-screen flex flex-col font-sans text-myn-dark bg-myn-cream">
-            {/* Hide Navbar/Footer on Admin View for cleaner interface */}
-            {currentView !== 'admin' && (
-                <Navbar setView={setCurrentView} cartCount={cart.length} currentView={currentView} />
+            {!isDashboard && (
+                <Navbar cartCount={cart.length} />
             )}
 
             <main className="flex-grow">
-                {/* We key the view to force re-animation on route change if desired, 
-                    or remove key to keep state if views were components holding state */}
-                {renderView()}
+                <Routes>
+                    <Route path="/" element={<HomeView addToCart={addToCart} />} />
+                    <Route path="/shop" element={<ShopView addToCart={addToCart} />} />
+                    <Route path="/subscription" element={<SubscriptionView />} />
+                    <Route path="/wholesale" element={<WholesaleView />} />
+                    <Route path="/guides" element={<GuidesView />} />
+                    <Route path="/login" element={<LoginView />} />
+
+                    {/* Protected Routes */}
+                    <Route element={<ProtectedRoute />}>
+                        <Route path="/dashboard" element={<UserDashboardView />} />
+                    </Route>
+
+                    {/* Admin Routes */}
+                    <Route element={<ProtectedRoute requireAdmin={true} />}>
+                        <Route path="/admin" element={<AdminView />} />
+                    </Route>
+                </Routes>
             </main>
 
-            {currentView !== 'admin' && (
-                <Footer setView={setCurrentView} />
+            {!isDashboard && (
+                <Footer />
             )}
         </div>
+    );
+};
+
+const App: React.FC = () => {
+    return (
+        <Router>
+            <AuthProvider>
+                <AppContent />
+            </AuthProvider>
+        </Router>
     );
 };
 

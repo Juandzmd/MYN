@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import DashboardCharts from '../components/admin/DashboardCharts';
-import { LayoutDashboard, ShoppingBag, Users, LogOut, Calendar } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Users, LogOut } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const AdminView: React.FC = () => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [password, setPassword] = useState('');
+    const { signOut } = useAuth();
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'dashboard' | 'sales' | 'visits'>('dashboard');
     const [timeRange, setTimeRange] = useState<'daily' | 'weekly' | 'monthly'>('daily');
@@ -13,17 +13,6 @@ const AdminView: React.FC = () => {
     // Data states
     const [salesData, setSalesData] = useState<any[]>([]);
     const [visitsData, setVisitsData] = useState<any[]>([]);
-
-    // Simple hardcoded auth for demo
-    const handleLogin = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (password === 'admin123') {
-            setIsAuthenticated(true);
-            fetchData();
-        } else {
-            alert('Contraseña incorrecta');
-        }
-    };
 
     const fetchData = async () => {
         setLoading(true);
@@ -38,8 +27,6 @@ const AdminView: React.FC = () => {
             setSalesData(sales || []);
 
             // Fetch Visits
-            // For chart, we might want to group them, but for now let's just get raw data
-            // In a real app, use RPC or group by in query if possible, or process client side
             const { data: visits, error: visitsError } = await supabase
                 .from('site_visits')
                 .select('*')
@@ -47,8 +34,6 @@ const AdminView: React.FC = () => {
 
             if (visitsError) throw visitsError;
 
-            // Process visits for chart (group by date/hour based on timeRange)
-            // This is a simplified processing for the demo
             const processedVisits = processVisitsData(visits || [], timeRange);
             setVisitsData(processedVisits);
 
@@ -61,44 +46,15 @@ const AdminView: React.FC = () => {
 
     // Helper to group visits
     const processVisitsData = (data: any[], range: string) => {
-        // Simple grouping logic - in a real app use date-fns to group properly
-        // This just returns raw data mapped for now to show movement
         return data.map(v => ({
             created_at: v.created_at,
-            count: 1 // Each row is 1 visit
+            count: 1
         }));
     };
 
     useEffect(() => {
-        if (isAuthenticated) {
-            fetchData();
-        }
-    }, [isAuthenticated, timeRange]);
-
-    if (!isAuthenticated) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-100">
-                <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
-                    <h2 className="text-2xl font-serif font-bold text-center mb-6 text-myn-dark">Admin Dashboard</h2>
-                    <form onSubmit={handleLogin} className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-myn-primary outline-none"
-                                placeholder="Ingrese contraseña"
-                            />
-                        </div>
-                        <button className="w-full bg-myn-primary text-white py-3 rounded-lg font-bold hover:bg-myn-dark transition-colors">
-                            Ingresar
-                        </button>
-                    </form>
-                </div>
-            </div>
-        );
-    }
+        fetchData();
+    }, [timeRange]);
 
     return (
         <div className="min-h-screen bg-gray-50 flex">
@@ -128,7 +84,7 @@ const AdminView: React.FC = () => {
                     </button>
                 </nav>
                 <div className="p-4 border-t border-white/10">
-                    <button onClick={() => setIsAuthenticated(false)} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+                    <button onClick={signOut} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
                         <LogOut size={18} /> Cerrar Sesión
                     </button>
                 </div>

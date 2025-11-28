@@ -1,104 +1,114 @@
 import React, { useState, useEffect } from 'react';
-import { ViewState, NavLink } from '../types';
-import { Leaf, ShoppingCart, Menu, X } from 'lucide-react';
+import { Menu, X, ShoppingBag, User } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 interface NavbarProps {
-    setView: (view: ViewState) => void;
     cartCount: number;
-    currentView: ViewState;
 }
 
-const navLinks: NavLink[] = [
-    { id: 'home', label: 'Inicio' },
-    { id: 'shop', label: 'Tienda' },
-    { id: 'subscription', label: 'Suscripción' },
-    { id: 'wholesale', label: 'Mayorista' },
-    { id: 'guides', label: 'Guías' },
-];
-
-const Navbar: React.FC<NavbarProps> = ({ setView, cartCount, currentView }) => {
+const Navbar: React.FC<NavbarProps> = ({ cartCount }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
+    const location = useLocation();
+    const { user } = useAuth();
 
     useEffect(() => {
-        const handleScroll = () => setScrolled(window.scrollY > 20);
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 20);
+        };
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    return (
-        <nav className={`sticky top-0 z-50 transition-all duration-300 ${isOpen ? 'bg-myn-cream py-3' : (scrolled ? 'bg-myn-cream/95 shadow-md py-3 backdrop-blur-md' : 'bg-myn-cream py-4 md:py-5')}`}>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between items-center">
-                    {/* Logo */}
-                    <div className="flex items-center cursor-pointer gap-2 group z-50" onClick={() => { setView('home'); setIsOpen(false); }}>
-                        <div className="text-myn-primary transform transition-transform group-hover:scale-110">
-                            <Leaf size={24} className="md:w-6 md:h-6 w-5 h-5" />
-                        </div>
-                        <div className="flex flex-col leading-none">
-                            <span className="text-xl md:text-2xl font-serif font-bold text-myn-dark tracking-wide">MYN</span>
-                            <span className="text-[8px] md:text-[10px] font-medium text-myn-primary uppercase tracking-[0.3em]">Coffee</span>
-                        </div>
-                    </div>
+    const navLinks = [
+        { path: '/', label: 'Inicio' },
+        { path: '/shop', label: 'Tienda' },
+        { path: '/subscription', label: 'Suscripción' },
+        { path: '/wholesale', label: 'Mayorista' },
+        { path: '/guides', label: 'Guías' },
+    ];
 
-                    {/* Desktop Menu */}
-                    <div className="hidden md:flex space-x-8">
-                        {navLinks.map(link => (
-                            <button
-                                key={link.id}
-                                onClick={() => setView(link.id)}
-                                className={`text-sm uppercase tracking-wider transition-all hover:text-myn-primary relative py-1
-                                ${currentView === link.id ? 'text-myn-dark font-bold' : 'text-gray-500'}`}
+    const isActive = (path: string) => location.pathname === path;
+
+    return (
+        <nav className={`sticky top-0 z-50 transition-all duration-300 ${scrolled || isOpen ? 'bg-myn-cream/95 shadow-md py-3 backdrop-blur-md' : 'bg-myn-cream py-4 md:py-5'}`}>
+            <div className="container mx-auto px-4 md:px-8 flex justify-between items-center">
+                {/* Logo */}
+                <Link to="/" className="font-serif text-2xl md:text-3xl font-bold tracking-tight text-myn-dark z-50 relative">
+                    MYN<span className="text-myn-primary">.</span>
+                </Link>
+
+                {/* Desktop Menu */}
+                <div className="hidden md:flex items-center gap-8">
+                    <div className="flex gap-6">
+                        {navLinks.map((link) => (
+                            <Link
+                                key={link.path}
+                                to={link.path}
+                                className={`text-sm uppercase tracking-widest font-medium transition-colors hover:text-myn-primary ${isActive(link.path) ? 'text-myn-primary' : 'text-myn-dark/80'}`}
                             >
                                 {link.label}
-                                {currentView === link.id && (
-                                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-myn-primary animate-fade-in"></span>
-                                )}
-                            </button>
+                            </Link>
                         ))}
                     </div>
 
-                    {/* Icons */}
-                    <div className="flex items-center space-x-3 md:space-x-4 z-50">
-                        <button className="relative p-2 text-myn-dark hover:text-myn-primary transition-colors group">
-                            <ShoppingCart size={24} className="md:w-6 md:h-6 w-5 h-5" />
+                    <div className="flex items-center gap-4 pl-6 border-l border-myn-dark/10">
+                        <Link to={user ? "/dashboard" : "/login"} className="text-myn-dark hover:text-myn-primary transition-colors relative group">
+                            <User size={20} />
+                            {user && <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full"></span>}
+                        </Link>
+                        <button className="relative text-myn-dark hover:text-myn-primary transition-colors">
+                            <ShoppingBag size={20} />
                             {cartCount > 0 && (
-                                <span className="absolute -top-1 -right-1 bg-myn-primary text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-sm transform group-hover:scale-110 transition-transform">
+                                <span className="absolute -top-2 -right-2 bg-myn-primary text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
                                     {cartCount}
                                 </span>
                             )}
                         </button>
-                        <button className="md:hidden p-2 text-myn-dark hover:text-myn-primary transition-colors focus:outline-none" onClick={() => setIsOpen(!isOpen)}>
-                            {isOpen ? <X size={24} /> : <Menu size={24} />}
-                        </button>
                     </div>
                 </div>
-            </div>
 
-            {/* Mobile Menu */}
-            {/* Mobile Menu Overlay */}
-            <div
-                className={`fixed inset-0 z-40 bg-myn-cream/90 backdrop-blur-xl flex flex-col items-center justify-center transition-all duration-500 ease-out md:hidden 
-                ${isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-full pointer-events-none'}`}
-            >
-                <div className="space-y-8 text-center">
-                    {navLinks.map((link, index) => (
-                        <button
-                            key={link.id}
-                            onClick={() => { setView(link.id); setIsOpen(false); }}
-                            className={`block text-3xl md:text-4xl font-serif font-bold transition-all duration-500 transform
-                            ${isOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}
-                            ${currentView === link.id ? 'text-myn-primary scale-110' : 'text-myn-dark hover:text-myn-primary hover:scale-105'}`}
-                            style={{ transitionDelay: `${index * 100}ms` }}
-                        >
-                            {link.label}
-                        </button>
-                    ))}
-                </div>
+                {/* Mobile Menu Button */}
+                <button
+                    className="md:hidden z-50 text-myn-dark p-1"
+                    onClick={() => setIsOpen(!isOpen)}
+                >
+                    {isOpen ? <X size={24} /> : <Menu size={24} />}
+                </button>
 
-                <div className={`absolute bottom-12 text-center transition-all duration-700 delay-500 ${isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-                    <div className="w-12 h-0.5 bg-myn-primary/30 mx-auto mb-4"></div>
-                    <p className="text-myn-primary text-xs font-bold uppercase tracking-[0.3em]">Myn Coffee Roasters</p>
+                {/* Mobile Menu Overlay */}
+                <div className={`fixed inset-0 bg-myn-cream/90 backdrop-blur-xl z-40 flex flex-col items-center justify-center transition-all duration-500 ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'}`}>
+                    <div className="flex flex-col items-center gap-8">
+                        {navLinks.map((link, index) => (
+                            <Link
+                                key={link.path}
+                                to={link.path}
+                                onClick={() => setIsOpen(false)}
+                                className={`text-2xl font-serif font-bold text-myn-dark hover:text-myn-primary transition-all transform ${isOpen ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
+                                style={{ transitionDelay: `${index * 100}ms` }}
+                            >
+                                {link.label}
+                            </Link>
+                        ))}
+                        <div className="flex gap-6 mt-4">
+                            <Link to={user ? "/dashboard" : "/login"} onClick={() => setIsOpen(false)} className="flex flex-col items-center gap-2 text-myn-dark">
+                                <User size={24} />
+                                <span className="text-xs uppercase tracking-widest">{user ? 'Mi Cuenta' : 'Login'}</span>
+                            </Link>
+                            <button className="flex flex-col items-center gap-2 text-myn-dark">
+                                <div className="relative">
+                                    <ShoppingBag size={24} />
+                                    {cartCount > 0 && (
+                                        <span className="absolute -top-2 -right-2 bg-myn-primary text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
+                                            {cartCount}
+                                        </span>
+                                    )}
+                                </div>
+                                <span className="text-xs uppercase tracking-widest">Carrito</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </nav>

@@ -1,12 +1,8 @@
 import React from 'react';
-import { ViewState } from '../types';
+import { Link } from 'react-router-dom';
 import { Leaf, Instagram, Mail, Phone, MapPin } from 'lucide-react';
 
-interface FooterProps {
-    setView: (view: ViewState) => void;
-}
-
-const Footer: React.FC<FooterProps> = ({ setView }) => (
+const Footer: React.FC = () => (
     <footer className="bg-myn-dark text-white pt-16 md:pt-20 pb-10 border-t border-white/10">
         <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-12 mb-16 text-center md:text-left">
             {/* Brand */}
@@ -24,10 +20,10 @@ const Footer: React.FC<FooterProps> = ({ setView }) => (
             <div>
                 <h4 className="text-xs font-bold uppercase tracking-widest mb-6 text-myn-primary">Explorar</h4>
                 <ul className="space-y-3 text-sm text-gray-400 flex flex-col items-center md:items-start">
-                    <li><button onClick={() => setView('shop')} className="hover:text-white transition-colors">Tienda Online</button></li>
-                    <li><button onClick={() => setView('subscription')} className="hover:text-white transition-colors">Club de Suscripción</button></li>
-                    <li><button onClick={() => setView('wholesale')} className="hover:text-white transition-colors">Venta Mayorista</button></li>
-                    <li><button onClick={() => setView('guides')} className="hover:text-white transition-colors">Escuela de Café</button></li>
+                    <li><Link to="/shop" className="hover:text-white transition-colors">Tienda Online</Link></li>
+                    <li><Link to="/subscription" className="hover:text-white transition-colors">Club de Suscripción</Link></li>
+                    <li><Link to="/wholesale" className="hover:text-white transition-colors">Venta Mayorista</Link></li>
+                    <li><Link to="/guides" className="hover:text-white transition-colors">Escuela de Café</Link></li>
                 </ul>
             </div>
 
@@ -54,7 +50,7 @@ const Footer: React.FC<FooterProps> = ({ setView }) => (
                 <p className="text-xs text-gray-500 max-w-xs">Tus transacciones están protegidas con encriptación SSL de nivel bancario.</p>
             </div>
         </div>
-        
+
         <div className="text-center text-gray-600 text-xs pt-8 border-t border-white/5">
             &copy; {new Date().getFullYear()} Myn Coffee Roasters. Diseñado con <span className="text-myn-primary">♥</span> y cafeína.
         </div>
