@@ -58,7 +58,7 @@ const Navbar: React.FC<NavbarProps> = ({ cartCount }) => {
                             <User size={20} />
                             {user && <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full"></span>}
                         </Link>
-                        <button className="relative text-myn-dark hover:text-myn-primary transition-colors">
+                        <button className="relative text-myn-dark hover:text-myn-primary transition-colors cursor-pointer">
                             <ShoppingBag size={20} />
                             {cartCount > 0 && (
                                 <span className="absolute -top-2 -right-2 bg-myn-primary text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
@@ -71,7 +71,7 @@ const Navbar: React.FC<NavbarProps> = ({ cartCount }) => {
 
                 {/* Mobile Menu Button */}
                 <button
-                    className="md:hidden z-50 text-myn-dark p-1"
+                    className="md:hidden z-50 text-myn-dark p-1 cursor-pointer"
                     onClick={() => setIsOpen(!isOpen)}
                 >
                     {isOpen ? <X size={24} /> : <Menu size={24} />}
@@ -96,7 +96,7 @@ const Navbar: React.FC<NavbarProps> = ({ cartCount }) => {
                                 <User size={24} />
                                 <span className="text-xs uppercase tracking-widest">{user ? 'Mi Cuenta' : 'Login'}</span>
                             </Link>
-                            <button className="flex flex-col items-center gap-2 text-myn-dark">
+                            <button className="flex flex-col items-center gap-2 text-myn-dark cursor-pointer">
                                 <div className="relative">
                                     <ShoppingBag size={24} />
                                     {cartCount > 0 && (

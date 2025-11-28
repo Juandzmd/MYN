@@ -43,3 +43,17 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #2d6a4f;
 }
+
+/* Interactive Elements Cursor */
+button:not(:disabled),
+a[href],
+[role="button"],
+label[for],
+select,
+summary {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
