@@ -1,26 +1,44 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
-import { ShoppingBag, Coffee, Star, LogOut } from 'lucide-react';
+import { ShoppingBag, Coffee, Star, LogOut, LayoutDashboard } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const UserDashboardView: React.FC = () => {
-    const { user, profile, signOut } = useAuth();
+    const { user, profile, isAdmin, signOut } = useAuth();
 
     return (
         <div className="min-h-screen bg-myn-cream pt-24 pb-12 px-4">
             <div className="max-w-6xl mx-auto">
                 <header className="flex justify-between items-center mb-10">
                     <div>
-                        <h1 className="text-3xl md:text-4xl font-serif text-myn-dark mb-2">
-                            Hola, {profile?.first_name || user?.email?.split('@')[0]}
-                        </h1>
+                        <div className="flex items-center gap-3 mb-2">
+                            <h1 className="text-3xl md:text-4xl font-serif text-myn-dark">
+                                Hola, {profile?.first_name || user?.email?.split('@')[0]}
+                            </h1>
+                            {isAdmin && (
+                                <span className="px-3 py-1 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-lg">
+                                    Admin
+                                </span>
+                            )}
+                        </div>
                         <p className="text-gray-600">Bienvenido a tu espacio personal del café.</p>
                     </div>
-                    <button
-                        onClick={signOut}
-                        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-700 transition-colors shadow-sm"
-                    >
-                        <LogOut size={18} /> Cerrar Sesión
-                    </button>
+                    <div className="flex items-center gap-3">
+                        {isAdmin && (
+                            <Link
+                                to="/admin"
+                                className="px-4 py-2 bg-myn-primary text-white rounded-lg hover:bg-myn-dark transition-colors shadow-sm font-medium flex items-center gap-2"
+                            >
+                                <LayoutDashboard size={18} /> Panel Admin
+                            </Link>
+                        )}
+                        <button
+                            onClick={signOut}
+                            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-700 transition-colors shadow-sm"
+                        >
+                            <LogOut size={18} /> Cerrar Sesión
+                        </button>
+                    </div>
                 </header>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -52,7 +70,7 @@ const UserDashboardView: React.FC = () => {
                             <ShoppingBag size={48} className="mx-auto text-gray-300 mb-3" />
                             <p className="text-gray-500 font-medium">Aún no has realizado pedidos</p>
                             <p className="text-sm text-gray-400 mb-4">¡Descubre nuestros orígenes únicos!</p>
-                            <a href="/shop" className="text-myn-primary font-bold hover:underline">Ir a la Tienda</a>
+                            <Link to="/shop" className="text-myn-primary font-bold hover:underline">Ir a la Tienda</Link>
                         </div>
                     </div>
 
@@ -63,7 +81,7 @@ const UserDashboardView: React.FC = () => {
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {[1, 2, 3].map((i) => (
-                                <div key={i} className="bg-white/10 backdrop-blur-sm p-4 rounded-xl flex items-center gap-4 hover:bg-white/20 transition-colors cursor-pointer">
+                                <div key={i} className="bg-white/10 backdrop-blur-sm p-4 rounded-xl flex items-center gap-4 hover:bg-white/20 transition-colors">
                                     <div className="w-16 h-16 bg-gray-200 rounded-lg shrink-0 overflow-hidden">
                                         <img src={`https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=200&q=80`} alt="Coffee" className="w-full h-full object-cover" />
                                     </div>
