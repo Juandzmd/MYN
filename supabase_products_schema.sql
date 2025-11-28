@@ -49,31 +49,31 @@ CREATE POLICY "Admins can delete products"
     )
   );
 
--- Insert initial 3 products
+-- Insert initial 3 products (MYN real products)
 INSERT INTO products (name, description, price, image_url, stock, category) VALUES
 (
-  'Etiopía Yirgacheffe',
-  'Café de origen único con notas florales y cítricas. Perfecto para métodos de filtrado.',
-  12990,
+  'Kenya Nyeri Signature',
+  'Café de origen único de Kenya con notas de caramelo, cítrico, floral y almendra. 250 gramos.',
+  13500,
   'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=800&q=80',
   50,
-  'Origen Único'
+  'Kenya'
 ),
 (
-  'Colombia Supremo',
-  'Cuerpo medio con notas de caramelo y frutos secos. Ideal para espresso.',
-  11990,
+  'Perú Valle Chanchamayo',
+  'Café peruano con cuerpo robusto y notas de chocolate, frutal y acidez baja. 250 gramos.',
+  12000,
   'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=800&q=80',
   75,
-  'Origen Único'
+  'Perú'
 ),
 (
-  'Blend Myn Signature',
-  'Nuestra mezcla exclusiva con balance perfecto entre dulzura y acidez.',
-  13990,
+  'Drip Coffee Individual (15g)',
+  'Café de filtro individual portátil con filtro incorporado. Mezcla de orígenes. 15 gramos por unidad.',
+  1500,
   'https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=800&q=80',
   100,
-  'Blend'
+  'Mix Orígenes'
 );
 
 -- Create updated_at trigger

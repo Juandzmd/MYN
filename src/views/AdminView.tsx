@@ -75,8 +75,8 @@ const AdminView: React.FC = () => {
                     <button
                         onClick={() => setActiveTab('dashboard')}
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeTab === 'dashboard'
-                                ? 'bg-white/20 shadow-lg'
-                                : 'hover:bg-white/10'
+                            ? 'bg-white/20 shadow-lg'
+                            : 'hover:bg-white/10'
                             }`}
                     >
                         <LayoutDashboard size={20} /> Dashboard
@@ -84,8 +84,8 @@ const AdminView: React.FC = () => {
                     <button
                         onClick={() => setActiveTab('sales')}
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeTab === 'sales'
-                                ? 'bg-white/20 shadow-lg'
-                                : 'hover:bg-white/10'
+                            ? 'bg-white/20 shadow-lg'
+                            : 'hover:bg-white/10'
                             }`}
                     >
                         <ShoppingBag size={20} /> Ventas
@@ -93,8 +93,8 @@ const AdminView: React.FC = () => {
                     <button
                         onClick={() => setActiveTab('visits')}
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeTab === 'visits'
-                                ? 'bg-white/20 shadow-lg'
-                                : 'hover:bg-white/10'
+                            ? 'bg-white/20 shadow-lg'
+                            : 'hover:bg-white/10'
                             }`}
                     >
                         <Users size={20} /> Visitas
@@ -102,8 +102,8 @@ const AdminView: React.FC = () => {
                     <button
                         onClick={() => setActiveTab('products')}
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeTab === 'products'
-                                ? 'bg-white/20 shadow-lg'
-                                : 'hover:bg-white/10'
+                            ? 'bg-white/20 shadow-lg'
+                            : 'hover:bg-white/10'
                             }`}
                     >
                         <Package size={20} /> Productos
@@ -152,8 +152,8 @@ const AdminView: React.FC = () => {
                                     key={range}
                                     onClick={() => setTimeRange(range)}
                                     className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${timeRange === range
-                                            ? 'bg-myn-primary text-white shadow-sm'
-                                            : 'text-gray-500 hover:text-gray-900'
+                                        ? 'bg-myn-primary text-white shadow-sm'
+                                        : 'text-gray-500 hover:text-gray-900'
                                         }`}
                                 >
                                     {range === 'daily' && 'Diario'}
@@ -213,7 +213,7 @@ const AdminView: React.FC = () => {
                         </div>
 
                         {/* Charts */}
-                        <DashboardCharts salesData={salesData} visitsData={visitsData} timeRange={timeRange} />
+                        <DashboardCharts salesData={salesData} visitsData={visitsData} timeRange={timeRange} activeTab={activeTab} />
                     </div>
                 )}
             </main>
