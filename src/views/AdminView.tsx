@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import DashboardCharts from '../components/admin/DashboardCharts';
 import ProductManagement from '../components/admin/ProductManagement';
-import { LayoutDashboard, ShoppingBag, Users, LogOut, Home, Package } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Users, LogOut, Home, Package, Menu, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const AdminView: React.FC = () => {
@@ -11,6 +11,7 @@ const AdminView: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'dashboard' | 'sales' | 'visits' | 'products'>('dashboard');
     const [timeRange, setTimeRange] = useState<'daily' | 'weekly' | 'monthly'>('daily');
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     // Data states
     const [salesData, setSalesData] = useState<any[]>([]);
@@ -36,8 +37,6 @@ const AdminView: React.FC = () => {
 
             if (visitsError) throw visitsError;
 
-            if (visitsError) throw visitsError;
-
             setVisitsData(visits || []);
 
         } catch (error) {
@@ -56,9 +55,21 @@ const AdminView: React.FC = () => {
     }, [timeRange, activeTab]);
 
     return (
-        <div className="min-h-screen bg-gray-50 flex">
+        <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
+            {/* Mobile Header */}
+            <header className="md:hidden bg-myn-dark text-white p-4 flex justify-between items-center sticky top-0 z-50 shadow-md">
+                <h1 className="text-xl font-serif font-bold">MYN Admin</h1>
+                <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+                    {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                </button>
+            </header>
+
             {/* Sidebar */}
-            <aside className="w-64 bg-gradient-to-b from-myn-dark to-myn-primary text-white hidden md:flex flex-col shadow-xl">
+            <aside className={`
+                fixed inset-y-0 left-0 z-40 w-64 bg-gradient-to-b from-myn-dark to-myn-primary text-white flex flex-col shadow-xl transition-transform duration-300 ease-in-out
+                md:static md:translate-x-0
+                ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
+            `}>
                 <div className="p-6 border-b border-white/10">
                     <h1 className="text-2xl font-serif font-bold">MYN Admin</h1>
                     <p className="text-sm text-myn-light/80 mt-1">Panel de Administración</p>
@@ -66,7 +77,7 @@ const AdminView: React.FC = () => {
 
                 <nav className="flex-1 px-4 py-6 space-y-2">
                     <button
-                        onClick={() => setActiveTab('dashboard')}
+                        onClick={() => { setActiveTab('dashboard'); setIsMobileMenuOpen(false); }}
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeTab === 'dashboard'
                             ? 'bg-white/20 shadow-lg'
                             : 'hover:bg-white/10'
@@ -75,7 +86,7 @@ const AdminView: React.FC = () => {
                         <LayoutDashboard size={20} /> Dashboard
                     </button>
                     <button
-                        onClick={() => setActiveTab('sales')}
+                        onClick={() => { setActiveTab('sales'); setIsMobileMenuOpen(false); }}
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeTab === 'sales'
                             ? 'bg-white/20 shadow-lg'
                             : 'hover:bg-white/10'
@@ -84,7 +95,7 @@ const AdminView: React.FC = () => {
                         <ShoppingBag size={20} /> Ventas
                     </button>
                     <button
-                        onClick={() => setActiveTab('visits')}
+                        onClick={() => { setActiveTab('visits'); setIsMobileMenuOpen(false); }}
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeTab === 'visits'
                             ? 'bg-white/20 shadow-lg'
                             : 'hover:bg-white/10'
@@ -93,7 +104,7 @@ const AdminView: React.FC = () => {
                         <Users size={20} /> Visitas
                     </button>
                     <button
-                        onClick={() => setActiveTab('products')}
+                        onClick={() => { setActiveTab('products'); setIsMobileMenuOpen(false); }}
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeTab === 'products'
                             ? 'bg-white/20 shadow-lg'
                             : 'hover:bg-white/10'
@@ -120,17 +131,17 @@ const AdminView: React.FC = () => {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 p-8 overflow-y-auto">
+            <main className="flex-1 p-4 md:p-8 overflow-y-auto w-full">
                 {/* Header */}
-                <header className="flex justify-between items-center mb-8">
+                <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8 gap-4">
                     <div>
-                        <h2 className="text-3xl font-bold text-gray-800">
+                        <h2 className="text-2xl md:text-3xl font-bold text-gray-800">
                             {activeTab === 'dashboard' && 'Resumen General'}
                             {activeTab === 'sales' && 'Reporte de Ventas'}
                             {activeTab === 'visits' && 'Tráfico Web'}
                             {activeTab === 'products' && 'Gestión de Productos'}
                         </h2>
-                        <p className="text-gray-500 mt-1">
+                        <p className="text-gray-500 mt-1 text-sm md:text-base">
                             {activeTab === 'products'
                                 ? 'Administra tu catálogo de productos'
                                 : 'Métricas y estadísticas'}
@@ -139,12 +150,12 @@ const AdminView: React.FC = () => {
 
                     {/* Time Range Selector - Hide for products tab */}
                     {activeTab !== 'products' && (
-                        <div className="flex bg-white rounded-lg shadow-sm p-1">
+                        <div className="flex bg-white rounded-lg shadow-sm p-1 w-full md:w-auto overflow-x-auto">
                             {(['daily', 'weekly', 'monthly'] as const).map((range) => (
                                 <button
                                     key={range}
                                     onClick={() => setTimeRange(range)}
-                                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${timeRange === range
+                                    className={`flex-1 md:flex-none px-4 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap ${timeRange === range
                                         ? 'bg-myn-primary text-white shadow-sm'
                                         : 'text-gray-500 hover:text-gray-900'
                                         }`}
