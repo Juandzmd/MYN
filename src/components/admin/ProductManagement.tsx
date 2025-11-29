@@ -27,6 +27,8 @@ const ProductManagement: React.FC = () => {
     const [price, setPrice] = useState('');
     const [stock, setStock] = useState('');
     const [category, setCategory] = useState('');
+    const [imageUrl, setImageUrl] = useState('');
+    const [imageFile, setImageFile] = useState<File | null>(null);
     const [mediaUrls, setMediaUrls] = useState<string[]>([]);
     const [mediaFiles, setMediaFiles] = useState<File[]>([]);
 

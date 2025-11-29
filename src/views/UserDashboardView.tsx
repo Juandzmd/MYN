@@ -116,7 +116,6 @@ const UserDashboardView: React.FC = () => {
                 </div>
             </div>
         </div>
-        </div >
     );
 };
 
