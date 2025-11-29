@@ -103,7 +103,7 @@ const UserDashboardView: React.FC = () => {
                             {recommendedProducts.map((product) => (
                                 <div key={product.id} className="bg-white/10 backdrop-blur-sm p-4 rounded-xl flex items-center gap-4 hover:bg-white/20 transition-colors">
                                     <div className="w-16 h-16 bg-gray-200 rounded-lg shrink-0 overflow-hidden">
-                                        <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                                        <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
                                     </div>
                                     <div>
                                         <h4 className="font-bold">{product.name}</h4>
@@ -116,6 +116,7 @@ const UserDashboardView: React.FC = () => {
                 </div>
             </div>
         </div>
+        </div >
     );
 };
 

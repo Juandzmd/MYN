@@ -1,10 +1,13 @@
 export interface Product {
-  id: number;
+  id: string;
   name: string;
   origin: string;
   price: number;
   tags: string[];
-  image: string;
+  image_url: string;
+  media_urls?: string[];
+  description?: string;
+  stock?: number;
 }
 
 export interface NavLink {

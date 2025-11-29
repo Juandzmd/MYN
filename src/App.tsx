@@ -6,6 +6,7 @@ import HomeView from './views/HomeView';
 import ShopView from './views/ShopView';
 import SubscriptionView from './views/SubscriptionView';
 import GuidesView from './views/GuidesView';
+import ProductDetailView from './views/ProductDetailView';
 import WholesaleView from './views/WholesaleView';
 import AdminView from './views/AdminView';
 import LoginView from './views/LoginView';
@@ -52,6 +53,7 @@ const AppContent: React.FC = () => {
                 <Routes>
                     <Route path="/" element={<HomeView addToCart={addToCart} />} />
                     <Route path="/shop" element={<ShopView addToCart={addToCart} />} />
+                    <Route path="/product/:id" element={<ProductDetailView addToCart={addToCart} />} />
                     <Route path="/subscription" element={<SubscriptionView />} />
                     <Route path="/wholesale" element={<WholesaleView />} />
                     <Route path="/guides" element={<GuidesView />} />

@@ -113,7 +113,7 @@ const CoffeeQuiz: React.FC<CoffeeQuizProps> = ({ addToCart }) => {
                         <div className="bg-myn-cream p-8 rounded-xl border border-myn-light mb-8 flex flex-col md:flex-row items-center gap-8 shadow-sm">
                             <div className="relative group">
                                 <img
-                                    src={recommendedProduct.image}
+                                    src={recommendedProduct.image_url}
                                     alt={recommendedProduct.name}
                                     className="w-48 h-48 object-cover rounded-lg shadow-lg transform rotate-3 transition-transform group-hover:rotate-0 group-hover:scale-105"
                                 />

@@ -27,8 +27,8 @@ const ProductManagement: React.FC = () => {
     const [price, setPrice] = useState('');
     const [stock, setStock] = useState('');
     const [category, setCategory] = useState('');
-    const [imageUrl, setImageUrl] = useState('');
-    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [mediaUrls, setMediaUrls] = useState<string[]>([]);
+    const [mediaFiles, setMediaFiles] = useState<File[]>([]);
 
     useEffect(() => {
         fetchProducts();
@@ -53,7 +53,6 @@ const ProductManagement: React.FC = () => {
 
     const handleImageUpload = async (file: File): Promise<string | null> => {
         try {
-            setUploading(true);
             const fileExt = file.name.split('.').pop();
             const fileName = `${Math.random()}.${fileExt}`;
             const filePath = `${fileName}`;
@@ -73,36 +72,46 @@ const ProductManagement: React.FC = () => {
             console.error('Error uploading image:', error);
             showToast(`❌ Error al subir imagen: ${error.message}`);
             return null;
-        } finally {
-            setUploading(false);
         }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setUploading(true);
 
         let finalImageUrl = imageUrl;
-
-        // Upload image if selected
-        if (imageFile) {
-            const uploadedUrl = await handleImageUpload(imageFile);
-            if (!uploadedUrl) return;
-            finalImageUrl = uploadedUrl;
-        }
+        let finalMediaUrls = [...mediaUrls];
 
         try {
+            // Upload main image if selected
+            if (imageFile) {
+                const uploadedUrl = await handleImageUpload(imageFile);
+                if (uploadedUrl) finalImageUrl = uploadedUrl;
+            }
+
+            // Upload additional media files
+            if (mediaFiles.length > 0) {
+                const uploadPromises = mediaFiles.map(file => handleImageUpload(file));
+                const uploadedUrls = await Promise.all(uploadPromises);
+                const validUrls = uploadedUrls.filter((url): url is string => url !== null);
+                finalMediaUrls = [...finalMediaUrls, ...validUrls];
+            }
+
+            const productData = {
+                name,
+                description,
+                price: parseFloat(price),
+                stock: parseInt(stock),
+                category,
+                image_url: finalImageUrl,
+                media_urls: finalMediaUrls
+            };
+
             if (editingProduct) {
                 // Update existing product
                 const { error } = await supabase
                     .from('products')
-                    .update({
-                        name,
-                        description,
-                        price: parseFloat(price),
-                        stock: parseInt(stock),
-                        category,
-                        image_url: finalImageUrl
-                    })
+                    .update(productData)
                     .eq('id', editingProduct.id);
 
                 if (error) throw error;
@@ -111,14 +120,7 @@ const ProductManagement: React.FC = () => {
                 // Create new product
                 const { error } = await supabase
                     .from('products')
-                    .insert({
-                        name,
-                        description,
-                        price: parseFloat(price),
-                        stock: parseInt(stock),
-                        category,
-                        image_url: finalImageUrl
-                    });
+                    .insert(productData);
 
                 if (error) throw error;
                 showToast('✅ Producto creado correctamente');
@@ -129,6 +131,8 @@ const ProductManagement: React.FC = () => {
         } catch (error: any) {
             console.error('Error saving product:', error);
             showToast(`❌ Error: ${error.message}`);
+        } finally {
+            setUploading(false);
         }
     };
 
@@ -156,9 +160,10 @@ const ProductManagement: React.FC = () => {
             setName(product.name);
             setDescription(product.description || '');
             setPrice(product.price.toString());
-            setStock(product.stock.toString());
-            setCategory(product.category || '');
+            setStock((product.stock || 0).toString());
+            setCategory(product.category || ''); // Note: category might not exist on type yet, but keeping for now
             setImageUrl(product.image_url || '');
+            setMediaUrls(product.media_urls || []);
         } else {
             setEditingProduct(null);
             setName('');
@@ -167,8 +172,10 @@ const ProductManagement: React.FC = () => {
             setStock('');
             setCategory('');
             setImageUrl('');
+            setMediaUrls([]);
         }
         setImageFile(null);
+        setMediaFiles([]);
         setShowModal(true);
     };
 
@@ -176,6 +183,11 @@ const ProductManagement: React.FC = () => {
         setShowModal(false);
         setEditingProduct(null);
         setImageFile(null);
+        setMediaFiles([]);
+    };
+
+    const removeMediaUrl = (indexToRemove: number) => {
+        setMediaUrls(prev => prev.filter((_, index) => index !== indexToRemove));
     };
 
     if (loading) {
@@ -202,9 +214,14 @@ const ProductManagement: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {products.map((product) => (
                     <div key={product.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
-                        <div className="h-48 bg-gray-200 overflow-hidden">
+                        <div className="h-48 bg-gray-200 overflow-hidden relative">
                             {product.image_url && (
                                 <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
+                            )}
+                            {(product.media_urls?.length || 0) > 0 && (
+                                <div className="absolute top-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                                    <Upload size={10} /> +{product.media_urls?.length}
+                                </div>
                             )}
                         </div>
                         <div className="p-4">
@@ -237,7 +254,7 @@ const ProductManagement: React.FC = () => {
             {showModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                        <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white">
+                        <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
                             <h3 className="text-2xl font-bold">{editingProduct ? 'Editar Producto' : 'Nuevo Producto'}</h3>
                             <button onClick={closeModal} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
                                 <X size={24} />
@@ -292,18 +309,18 @@ const ProductManagement: React.FC = () => {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-1">Categoría</label>
+                                <label className="block text-sm font-bold text-gray-700 mb-1">Categoría / Origen</label>
                                 <input
                                     type="text"
                                     value={category}
                                     onChange={(e) => setCategory(e.target.value)}
                                     className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-myn-primary focus:border-transparent"
-                                    placeholder="Ej: Origen Único, Blend"
+                                    placeholder="Ej: Kenya, Perú, Blend"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-1">Imagen</label>
+                                <label className="block text-sm font-bold text-gray-700 mb-1">Imagen Principal</label>
                                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
                                     <input
                                         type="file"
@@ -312,8 +329,46 @@ const ProductManagement: React.FC = () => {
                                         className="w-full"
                                     />
                                     {imageUrl && !imageFile && (
-                                        <div className="mt-3">
+                                        <div className="mt-3 relative inline-block">
                                             <img src={imageUrl} alt="Preview" className="h-32 object-cover rounded-lg" />
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-1">Galería Multimedia (Imágenes/Videos)</label>
+                                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                                    <input
+                                        type="file"
+                                        accept="image/*,video/*"
+                                        multiple
+                                        onChange={(e) => setMediaFiles(Array.from(e.target.files || []))}
+                                        className="w-full mb-3"
+                                    />
+
+                                    {/* Existing Media Preview */}
+                                    {mediaUrls.length > 0 && (
+                                        <div className="flex gap-2 overflow-x-auto pb-2">
+                                            {mediaUrls.map((url, index) => (
+                                                <div key={index} className="relative shrink-0 w-20 h-20">
+                                                    <img src={url} alt={`Media ${index}`} className="w-full h-full object-cover rounded-lg" />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeMediaUrl(index)}
+                                                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600"
+                                                    >
+                                                        <X size={12} />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {/* New Files Preview */}
+                                    {mediaFiles.length > 0 && (
+                                        <div className="mt-2 text-sm text-gray-600">
+                                            {mediaFiles.length} archivos seleccionados para subir
                                         </div>
                                     )}
                                 </div>
@@ -335,7 +390,7 @@ const ProductManagement: React.FC = () => {
                                     {uploading ? (
                                         <>
                                             <Loader2 className="animate-spin" size={20} />
-                                            Subiendo...
+                                            {editingProduct ? 'Guardando...' : 'Creando...'}
                                         </>
                                     ) : (
                                         editingProduct ? 'Actualizar' : 'Crear Producto'

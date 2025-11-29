@@ -112,7 +112,7 @@ const HomeView: React.FC<HomeViewProps> = ({ setView, addToCart }) => {
                         <div key={product.id} className="group relative bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col">
                             {/* Image */}
                             <div className="h-64 md:h-72 overflow-hidden relative">
-                                <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                                <img src={product.image_url} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                                 <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-myn-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 shadow-sm border border-myn-light">
                                     <Star size={10} fill="currentColor" /> Destacado
                                 </div>
