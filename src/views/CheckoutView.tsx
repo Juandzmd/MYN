@@ -55,6 +55,22 @@ const CheckoutView: React.FC = () => {
         }
     }, [user, items, navigate]);
 
+    // Update shipping data when profile is loaded
+    useEffect(() => {
+        if (profile) {
+            setShippingData(prev => ({
+                ...prev,
+                firstName: profile.first_name || prev.firstName,
+                lastName: profile.last_name || prev.lastName,
+                email: user?.email || prev.email,
+                phone: profile.phone || prev.phone,
+                address: profile.street_address || prev.address,
+                commune: profile.commune || prev.commune,
+                region: profile.region || prev.region,
+            }));
+        }
+    }, [profile, user]);
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setShippingData({
             ...shippingData,
@@ -107,7 +123,7 @@ const CheckoutView: React.FC = () => {
                 commerceOrder,
                 subject: `Orden MYN Coffee #${commerceOrder}`,
                 currency: 'CLP',
-                amount: Math.round(total),
+                amount: Math.round(finalTotal),
                 email: shippingData.email,
                 urlConfirmation: `${baseUrl}payment/confirmation`,
                 urlReturn: `${baseUrl}payment/return`,
