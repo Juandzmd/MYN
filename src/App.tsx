@@ -12,6 +12,9 @@ import WholesaleView from './views/WholesaleView';
 import AdminView from './views/AdminView';
 import LoginView from './views/LoginView';
 import UserDashboardView from './views/UserDashboardView';
+import CheckoutView from './views/CheckoutView';
+import PaymentConfirmationView from './views/PaymentConfirmationView';
+import PaymentReturnView from './views/PaymentReturnView';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider, useCart } from './context/CartContext';
@@ -40,9 +43,14 @@ const AppContent: React.FC = () => {
                     <Route path="/guides" element={<GuidesView />} />
                     <Route path="/login" element={<LoginView />} />
 
+                    {/* Payment Routes */}
+                    <Route path="/payment/confirmation" element={<PaymentConfirmationView />} />
+                    <Route path="/payment/return" element={<PaymentReturnView />} />
+
                     {/* Protected Routes */}
                     <Route element={<ProtectedRoute />}>
                         <Route path="/dashboard" element={<UserDashboardView />} />
+                        <Route path="/checkout" element={<CheckoutView />} />
                     </Route>
 
                     {/* Admin Routes */}
