@@ -32,7 +32,7 @@ const Navbar: React.FC<NavbarProps> = ({ cartCount }) => {
     const isActive = (path: string) => location.pathname === path;
 
     return (
-        <nav className={`sticky top-0 z-50 transition-all duration-300 ${scrolled || isOpen ? 'bg-myn-cream/95 shadow-md py-3 backdrop-blur-md' : 'bg-myn-cream py-4 md:py-5'}`}>
+        <nav className={`sticky top-0 z-50 transition-all duration-300 ${scrolled || isOpen ? 'bg-myn-cream/95 shadow-md py-3' : 'bg-myn-cream py-4 md:py-5'} ${scrolled && !isOpen ? 'backdrop-blur-md' : ''}`}>
             <div className="container mx-auto px-4 md:px-8 flex justify-between items-center">
                 {/* Logo */}
                 <Link to="/" className="font-serif text-2xl md:text-3xl font-bold tracking-tight text-myn-dark z-50 relative">

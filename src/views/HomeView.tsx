@@ -124,7 +124,7 @@ const HomeView: React.FC<HomeViewProps> = ({ setView, addToCart }) => {
                                 <div className="text-xs text-myn-primary font-bold uppercase tracking-wider mb-2">{product.origin}</div>
                                 <h3 className="text-xl font-serif font-bold text-myn-dark mb-3 group-hover:text-myn-primary transition-colors">{product.name}</h3>
                                 <div className="flex flex-wrap gap-2 mb-6">
-                                    {product.tags.map(tag => (
+                                    {(product.tags || []).map(tag => (
                                         <span key={tag} className="text-[10px] font-medium bg-myn-sand/50 px-2 py-1 rounded-md text-gray-600 border border-transparent group-hover:border-myn-light transition-colors">{tag}</span>
                                     ))}
                                 </div>

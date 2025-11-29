@@ -69,7 +69,7 @@ const ShopView: React.FC<ShopViewProps> = ({ addToCart }) => {
                             />
                             <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors"></div>
                             <div className="absolute top-4 left-4 flex flex-wrap gap-1">
-                                {product.tags.map(tag => (
+                                {(product.tags || []).map(tag => (
                                     <span key={tag} className="inline-block bg-white/90 backdrop-blur-sm text-myn-dark text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full shadow-sm">
                                         {tag}
                                     </span>

@@ -107,7 +107,7 @@ const UserDashboardView: React.FC = () => {
                                     </div>
                                     <div>
                                         <h4 className="font-bold">{product.name}</h4>
-                                        <p className="text-xs text-gray-300">{product.origin} - {product.tags[0]}</p>
+                                        <p className="text-xs text-gray-300">{product.origin} - {(product.tags || [])[0]}</p>
                                     </div>
                                 </div>
                             ))}
