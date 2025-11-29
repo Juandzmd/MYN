@@ -3,11 +3,12 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "homepage": "https://juandzmd.github.io/MYN",
   "scripts": {
     "dev": "vite",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
-    "build": "vite build && node -e \"require('fs').writeFileSync('dist/.nojekyll', '')\"",
+    "build": "vite build && node -e \"require('fs').writeFileSync('dist/.nojekyll', '')\" && node -e \"require('fs').copyFileSync('dist/index.html', 'dist/404.html')\"",
     "preview": "vite preview"
   },
   "dependencies": {
