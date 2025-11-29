@@ -53,10 +53,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, [items]);
 
     const addToCart = (product: Product, quantity: number = 1) => {
-        const existingItem = items.find(item => item.product.id === product.id);
-
+        let isUpdate = false;
+        
         setItems(prev => {
+            const existingItem = prev.find(item => item.product.id === product.id);
             if (existingItem) {
+                isUpdate = true;
                 return prev.map(item =>
                     item.product.id === product.id
                         ? { ...item, quantity: item.quantity + quantity }
@@ -66,10 +68,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             return [...prev, { product, quantity }];
         });
 
-        // Show toast AFTER state update (outside setState to prevent duplicates)
+        // Show toast
         setTimeout(() => {
-            if (existingItem) {
-                showToast(`✅ ${product.name} actualizado (${existingItem.quantity + quantity})`);
+            if (isUpdate) {
+                showToast(`✅ Cantidad actualizada: ${product.name}`);
             } else {
                 showToast(`✅ ${product.name} añadido al carrito`);
             }
