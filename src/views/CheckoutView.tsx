@@ -21,9 +21,30 @@ const CheckoutView: React.FC = () => {
         phone: '',
         address: '',
         city: '',
+        commune: '',
         region: '',
         zipCode: '',
     });
+
+    // Chilean regions
+    const regions = [
+        'Región de Arica y Parinacota',
+        'Región de Tarapacá',
+        'Región de Antofagasta',
+        'Región de Atacama',
+        'Región de Coquimbo',
+        'Región de Valparaíso',
+        'Región Metropolitana de Santiago',
+        'Región del Libertador General Bernardo O\'Higgins',
+        'Región del Maule',
+        'Región de Ñuble',
+        'Región del Biobío',
+        'Región de La Araucanía',
+        'Región de Los Ríos',
+        'Región de Los Lagos',
+        'Región de Aysén del General Carlos Ibáñez del Campo',
+        'Región de Magallanes y de la Antártica Chilena',
+    ];
 
     useEffect(() => {
         if (!user) {
@@ -34,7 +55,7 @@ const CheckoutView: React.FC = () => {
         }
     }, [user, items, navigate]);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setShippingData({
             ...shippingData,
             [e.target.name]: e.target.value,
@@ -208,17 +229,18 @@ const CheckoutView: React.FC = () => {
                                     />
                                 </div>
 
-                                <div className="grid md:grid-cols-3 gap-4">
+                                <div className="grid md:grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-bold text-gray-700 mb-2">
-                                            Ciudad
+                                            Comuna
                                         </label>
                                         <input
                                             type="text"
-                                            name="city"
-                                            value={shippingData.city}
+                                            name="commune"
+                                            value={shippingData.commune}
                                             onChange={handleInputChange}
                                             required
+                                            placeholder="Ej: Pedro Aguirre Cerda"
                                             className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-myn-primary focus:border-transparent"
                                         />
                                     </div>
@@ -227,28 +249,20 @@ const CheckoutView: React.FC = () => {
                                         <label className="block text-sm font-bold text-gray-700 mb-2">
                                             Región
                                         </label>
-                                        <input
-                                            type="text"
+                                        <select
                                             name="region"
                                             value={shippingData.region}
                                             onChange={handleInputChange}
                                             required
-                                            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-myn-primary focus:border-transparent"
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-bold text-gray-700 mb-2">
-                                            Código Postal
-                                        </label>
-                                        <input
-                                            type="text"
-                                            name="zipCode"
-                                            value={shippingData.zipCode}
-                                            onChange={handleInputChange}
-                                            required
-                                            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-myn-primary focus:border-transparent"
-                                        />
+                                            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-myn-primary focus:border-transparent bg-white"
+                                        >
+                                            <option value="">Seleccionar región</option>
+                                            {regions.map((region) => (
+                                                <option key={region} value={region}>
+                                                    {region}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </div>
                                 </div>
 

@@ -30,3 +30,10 @@ dist-ssr
 .env
 .env.local
 .env.production
+
+# Supabase
+supabase/.temp
+supabase/config.toml
+supabase/.branches
+supabase_migration.sql
+

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Product } from '../types';
+import { useToast } from './ToastContext';
 
 export interface CartItem {
     product: Product;
@@ -32,6 +33,7 @@ export const useCart = () => {
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [items, setItems] = useState<CartItem[]>([]);
     const [isOpen, setIsOpen] = useState(false);
+    const { showToast } = useToast();
 
     // Load cart from localStorage on mount
     useEffect(() => {
@@ -51,8 +53,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, [items]);
 
     const addToCart = (product: Product, quantity: number = 1) => {
+        const existingItem = items.find(item => item.product.id === product.id);
+
         setItems(prev => {
-            const existingItem = prev.find(item => item.product.id === product.id);
             if (existingItem) {
                 return prev.map(item =>
                     item.product.id === product.id
@@ -62,7 +65,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             }
             return [...prev, { product, quantity }];
         });
-        setIsOpen(true); // Auto-open cart when adding item
+
+        // Show toast AFTER state update (outside setState to prevent duplicates)
+        setTimeout(() => {
+            if (existingItem) {
+                showToast(`✅ ${product.name} actualizado (${existingItem.quantity + quantity})`);
+            } else {
+                showToast(`✅ ${product.name} añadido al carrito`);
+            }
+        }, 0);
     };
 
     const removeFromCart = (productId: string) => {

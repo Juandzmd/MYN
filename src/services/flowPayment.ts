@@ -1,8 +1,4 @@
-import CryptoJS from 'crypto-js';
-
-const FLOW_API_KEY = import.meta.env.VITE_FLOW_API_KEY || '';
-const FLOW_SECRET_KEY = import.meta.env.VITE_FLOW_SECRET_KEY || '';
-const FLOW_ENDPOINT = import.meta.env.VITE_FLOW_ENDPOINT || 'https://sandbox.flow.cl/api';
+import { supabase } from '../supabaseClient';
 
 interface FlowPaymentParams {
     commerceOrder: string;
@@ -22,90 +18,48 @@ interface FlowPaymentResponse {
 }
 
 /**
- * Signs parameters with HMAC SHA256
- */
-function signParameters(params: Record<string, any>): string {
-    // Remove 's' parameter if exists
-    const { s, ...paramsToSign } = params;
-
-    // Sort parameters alphabetically
-    const sortedKeys = Object.keys(paramsToSign).sort();
-
-    // Concatenate: key1value1key2value2...
-    let stringToSign = '';
-    sortedKeys.forEach(key => {
-        stringToSign += key + paramsToSign[key];
-    });
-
-    // Sign with HMAC SHA256
-    const signature = CryptoJS.HmacSHA256(stringToSign, FLOW_SECRET_KEY).toString();
-
-    return signature;
-}
-
-/**
- * Creates a payment order with Flow
+ * Creates a payment order with Flow via Supabase Edge Function
  */
 export async function createFlowPayment(params: FlowPaymentParams): Promise<FlowPaymentResponse> {
-    const paymentParams: Record<string, any> = {
-        apiKey: FLOW_API_KEY,
-        commerceOrder: params.commerceOrder,
-        subject: params.subject,
-        currency: params.currency,
-        amount: params.amount,
-        email: params.email,
-        urlConfirmation: params.urlConfirmation,
-        urlReturn: params.urlReturn,
-    };
+    // Get auth session
+    const { data: { session } } = await supabase.auth.getSession();
 
-    if (params.optional) {
-        paymentParams.optional = params.optional;
-    }
-
-    // Sign the parameters
-    const signature = signParameters(paymentParams);
-    paymentParams.s = signature;
-
-    // Make POST request
-    const response = await fetch(`${FLOW_ENDPOINT}/payment/create`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams(paymentParams).toString(),
+    const { data, error } = await supabase.functions.invoke('create-payment', {
+        body: params
     });
 
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error creating Flow payment');
+    if (error) {
+        console.error('Edge Function error:', error);
+        throw new Error(error.message || 'Error creating payment');
     }
 
-    return await response.json();
+    if (data?.error) {
+        console.error('Flow API error:', data.error);
+        throw new Error(data.error);
+    }
+
+    return data;
 }
 
 /**
- * Get payment status from Flow
+ * Get payment status from Flow via Supabase Edge Function
  */
 export async function getFlowPaymentStatus(token: string): Promise<any> {
-    const params: Record<string, any> = {
-        apiKey: FLOW_API_KEY,
-        token,
-    };
+    const { data: { session } } = await supabase.auth.getSession();
 
-    // Sign the parameters
-    const signature = signParameters(params);
-    params.s = signature;
+    const { data, error } = await supabase.functions.invoke('get-payment-status', {
+        body: { token }
+    });
 
-    // Make GET request
-    const queryString = new URLSearchParams(params).toString();
-    const response = await fetch(`${FLOW_ENDPOINT}/payment/getStatus?${queryString}`);
-
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Error getting payment status');
+    if (error) {
+        throw new Error(error.message || 'Error getting payment status');
     }
 
-    return await response.json();
+    if (data?.error) {
+        throw new Error(data.error);
+    }
+
+    return data;
 }
 
 /**
