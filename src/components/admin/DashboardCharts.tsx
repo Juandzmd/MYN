@@ -43,11 +43,36 @@ const DashboardCharts: React.FC<DashboardChartsProps> = ({ salesData, visitsData
         })).sort((a, b) => a.date.localeCompare(b.date));
     };
 
-    const productDistribution = [
-        { name: 'Kenya Nyeri', value: 35, sales: 15 },
-        { name: 'Perú Valle', value: 40, sales: 18 },
-        { name: 'Drip Coffee', value: 25, sales: 12 }
-    ];
+    const calculateProductDistribution = (data: any[]) => {
+        const distribution: { [key: string]: { value: number, sales: number } } = {};
+
+        data.forEach(sale => {
+            // Handle different potential structures
+            const products = sale.items || (sale.product_name ? [{ name: sale.product_name, price: sale.amount }] : []);
+
+            products.forEach((product: any) => {
+                const name = product.name || 'Desconocido';
+                if (!distribution[name]) {
+                    distribution[name] = { value: 0, sales: 0 };
+                }
+                distribution[name].value += 1; // Count of items sold
+                distribution[name].sales += 1; // Count of transactions (approx)
+            });
+        });
+
+        // Convert to array and take top 5
+        const result = Object.entries(distribution).map(([name, stats]) => ({
+            name,
+            value: stats.value,
+            sales: stats.sales
+        })).sort((a, b) => b.value - a.value).slice(0, 5);
+
+        return result.length > 0 ? result : [
+            { name: 'Sin datos', value: 100, sales: 0 }
+        ];
+    };
+
+    const productDistribution = calculateProductDistribution(salesData);
 
     const aggregatedVisits = aggregateData(visitsData, timeRange);
     const aggregatedSales = aggregateData(salesData, timeRange, 'amount');

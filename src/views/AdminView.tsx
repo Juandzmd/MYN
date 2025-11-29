@@ -36,22 +36,15 @@ const AdminView: React.FC = () => {
 
             if (visitsError) throw visitsError;
 
-            const processedVisits = processVisitsData(visits || [], timeRange);
-            setVisitsData(processedVisits);
+            if (visitsError) throw visitsError;
+
+            setVisitsData(visits || []);
 
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {
             setLoading(false);
         }
-    };
-
-    // Helper to group visits
-    const processVisitsData = (data: any[], range: string) => {
-        return data.map(v => ({
-            created_at: v.created_at,
-            count: 1
-        }));
     };
 
     useEffect(() => {

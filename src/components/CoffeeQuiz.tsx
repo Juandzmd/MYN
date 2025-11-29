@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Product, QuizAnswers } from '../types';
-import { PRODUCTS, QUIZ_STEPS } from '../constants';
+import { supabase } from '../supabaseClient';
+import { QUIZ_STEPS } from '../constants';
 import { Leaf, ArrowRight, Check, RefreshCw } from 'lucide-react';
 
 interface CoffeeQuizProps {
@@ -10,6 +11,23 @@ interface CoffeeQuizProps {
 const CoffeeQuiz: React.FC<CoffeeQuizProps> = ({ addToCart }) => {
     const [step, setStep] = useState(0);
     const [answers, setAnswers] = useState<QuizAnswers>({});
+    const [products, setProducts] = useState<Product[]>([]);
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            const { data, error } = await supabase
+                .from('products')
+                .select('*');
+
+            if (error) {
+                console.error('Error fetching products for quiz:', error);
+            } else if (data) {
+                setProducts(data as Product[]);
+            }
+        };
+
+        fetchProducts();
+    }, []);
 
     const handleAnswer = (key: keyof QuizAnswers, value: string) => {
         setAnswers({ ...answers, [key]: value });
@@ -21,11 +39,15 @@ const CoffeeQuiz: React.FC<CoffeeQuizProps> = ({ addToCart }) => {
         setAnswers({});
     };
 
-    const getRecommendation = (): Product => {
-        // Logic from prototype:
-        if (answers.roast === 'claro') return PRODUCTS[0]; // Etiopia
-        if (answers.roast === 'intenso') return PRODUCTS[2]; // Amazonas
-        return PRODUCTS[1]; // Huila (default/medium)
+    const getRecommendation = (): Product | null => {
+        if (products.length === 0) return null;
+
+        const kenya = products.find(p => p.name.toLowerCase().includes('kenya'));
+        const peru = products.find(p => p.name.toLowerCase().includes('perú') || p.name.toLowerCase().includes('peru'));
+
+        if (answers.roast === 'claro') return kenya || products[0];
+        if (answers.roast === 'intenso') return peru || products[0];
+        return peru || products[0]; // Default/Medium
     };
 
     const currentStepData = QUIZ_STEPS[step];
@@ -52,8 +74,8 @@ const CoffeeQuiz: React.FC<CoffeeQuizProps> = ({ addToCart }) => {
                             <span>Paso {step + 1} de 3</span>
                         </div>
                         <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                            <div 
-                                className="h-full bg-myn-primary transition-all duration-500 ease-out" 
+                            <div
+                                className="h-full bg-myn-primary transition-all duration-500 ease-out"
                                 style={{ width: `${((step + 1) / 3) * 100}%` }}
                             ></div>
                         </div>
@@ -90,10 +112,10 @@ const CoffeeQuiz: React.FC<CoffeeQuizProps> = ({ addToCart }) => {
                     {recommendedProduct && (
                         <div className="bg-myn-cream p-8 rounded-xl border border-myn-light mb-8 flex flex-col md:flex-row items-center gap-8 shadow-sm">
                             <div className="relative group">
-                                <img 
-                                    src={recommendedProduct.image} 
-                                    alt={recommendedProduct.name} 
-                                    className="w-48 h-48 object-cover rounded-lg shadow-lg transform rotate-3 transition-transform group-hover:rotate-0 group-hover:scale-105" 
+                                <img
+                                    src={recommendedProduct.image}
+                                    alt={recommendedProduct.name}
+                                    className="w-48 h-48 object-cover rounded-lg shadow-lg transform rotate-3 transition-transform group-hover:rotate-0 group-hover:scale-105"
                                 />
                                 <div className="absolute -bottom-3 -right-3 bg-myn-dark text-white text-xs px-3 py-1 rounded-full uppercase tracking-wider shadow-md">
                                     Recomendado
@@ -119,15 +141,15 @@ const CoffeeQuiz: React.FC<CoffeeQuizProps> = ({ addToCart }) => {
 
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         {recommendedProduct && (
-                            <button 
-                                onClick={() => addToCart(recommendedProduct)} 
+                            <button
+                                onClick={() => addToCart(recommendedProduct)}
                                 className="px-10 py-4 bg-myn-dark text-white rounded-lg hover:bg-myn-primary transition-colors font-bold uppercase tracking-wider shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center gap-2"
                             >
                                 Añadir al Carrito
                             </button>
                         )}
-                        <button 
-                            onClick={resetQuiz} 
+                        <button
+                            onClick={resetQuiz}
                             className="px-10 py-4 text-gray-500 hover:text-myn-dark font-medium underline decoration-myn-light underline-offset-4 flex items-center justify-center gap-2"
                         >
                             <RefreshCw size={16} /> Volver a intentar

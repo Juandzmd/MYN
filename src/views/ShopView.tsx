@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Product } from '../types';
-import { PRODUCTS } from '../constants';
+import { supabase } from '../supabaseClient';
 import { Leaf, ShoppingCart } from 'lucide-react';
 
 interface ShopViewProps {
@@ -9,12 +9,29 @@ interface ShopViewProps {
 
 const ShopView: React.FC<ShopViewProps> = ({ addToCart }) => {
     const [filter, setFilter] = useState('todos');
-    
-    const displayedProducts = filter === 'todos' 
-        ? PRODUCTS 
-        : PRODUCTS.filter(p => p.origin === filter);
+    const [products, setProducts] = useState<Product[]>([]);
 
-    const origins = ['todos', ...Array.from(new Set(PRODUCTS.map(p => p.origin).filter(o => o !== "Mix Orígenes")))];
+    useEffect(() => {
+        const fetchProducts = async () => {
+            const { data, error } = await supabase
+                .from('products')
+                .select('*');
+
+            if (error) {
+                console.error('Error fetching products:', error);
+            } else if (data) {
+                setProducts(data as Product[]);
+            }
+        };
+
+        fetchProducts();
+    }, []);
+
+    const displayedProducts = filter === 'todos'
+        ? products
+        : products.filter(p => p.origin === filter);
+
+    const origins: string[] = ['todos', ...Array.from(new Set<string>(products.map(p => p.origin).filter(o => o !== "Mix Orígenes")))];
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-16 animate-fade-in bg-texture min-h-screen">
@@ -31,9 +48,9 @@ const ShopView: React.FC<ShopViewProps> = ({ addToCart }) => {
                         key={f}
                         onClick={() => setFilter(f)}
                         className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300
-                        ${filter === f 
-                            ? 'bg-myn-dark text-white shadow-lg transform scale-105' 
-                            : 'bg-white text-gray-600 border border-gray-200 hover:border-myn-primary hover:text-myn-primary'}`}
+                        ${filter === f
+                                ? 'bg-myn-dark text-white shadow-lg transform scale-105'
+                                : 'bg-white text-gray-600 border border-gray-200 hover:border-myn-primary hover:text-myn-primary'}`}
                     >
                         {f.charAt(0).toUpperCase() + f.slice(1)}
                     </button>
@@ -45,10 +62,10 @@ const ShopView: React.FC<ShopViewProps> = ({ addToCart }) => {
                 {displayedProducts.map(product => (
                     <div key={product.id} className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 flex flex-col">
                         <div className="relative h-72 overflow-hidden">
-                            <img 
-                                src={product.image} 
-                                alt={product.name} 
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                            <img
+                                src={product.image}
+                                alt={product.name}
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                             />
                             <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors"></div>
                             <div className="absolute top-4 left-4 flex flex-wrap gap-1">

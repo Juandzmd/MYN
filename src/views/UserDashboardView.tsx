@@ -1,10 +1,30 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { ShoppingBag, Coffee, Star, LogOut, LayoutDashboard } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { supabase } from '../supabaseClient';
+import { Product } from '../types';
 
 const UserDashboardView: React.FC = () => {
     const { user, profile, isAdmin, signOut } = useAuth();
+    const [recommendedProducts, setRecommendedProducts] = useState<Product[]>([]);
+
+    useEffect(() => {
+        const fetchRecommendations = async () => {
+            const { data, error } = await supabase
+                .from('products')
+                .select('*')
+                .limit(3);
+
+            if (error) {
+                console.error('Error fetching recommendations:', error);
+            } else if (data) {
+                setRecommendedProducts(data as Product[]);
+            }
+        };
+
+        fetchRecommendations();
+    }, []);
 
     return (
         <div className="min-h-screen bg-myn-cream pt-24 pb-12 px-4">
@@ -80,14 +100,14 @@ const UserDashboardView: React.FC = () => {
                             <Star className="text-yellow-400" size={24} /> Recomendado para ti
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {[1, 2, 3].map((i) => (
-                                <div key={i} className="bg-white/10 backdrop-blur-sm p-4 rounded-xl flex items-center gap-4 hover:bg-white/20 transition-colors">
+                            {recommendedProducts.map((product) => (
+                                <div key={product.id} className="bg-white/10 backdrop-blur-sm p-4 rounded-xl flex items-center gap-4 hover:bg-white/20 transition-colors">
                                     <div className="w-16 h-16 bg-gray-200 rounded-lg shrink-0 overflow-hidden">
-                                        <img src={`https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=200&q=80`} alt="Coffee" className="w-full h-full object-cover" />
+                                        <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
                                     </div>
                                     <div>
-                                        <h4 className="font-bold">Etiopía Yirgacheffe</h4>
-                                        <p className="text-xs text-gray-300">Notas florales y cítricas</p>
+                                        <h4 className="font-bold">{product.name}</h4>
+                                        <p className="text-xs text-gray-300">{product.origin} - {product.tags[0]}</p>
                                     </div>
                                 </div>
                             ))}

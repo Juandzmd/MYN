@@ -1,7 +1,7 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ViewState, Product } from '../types';
-import { PRODUCTS } from '../constants';
+import { supabase } from '../supabaseClient';
 import CoffeeQuiz from '../components/CoffeeQuiz';
 import { Star, ArrowRight, ShoppingCart } from 'lucide-react';
 
@@ -11,19 +11,36 @@ interface HomeViewProps {
 }
 
 const HomeView: React.FC<HomeViewProps> = ({ setView, addToCart }) => {
-    const featuredProducts = PRODUCTS.slice(0, 3);
+    const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            const { data, error } = await supabase
+                .from('products')
+                .select('*')
+                .limit(3);
+
+            if (error) {
+                console.error('Error fetching featured products:', error);
+            } else if (data) {
+                setFeaturedProducts(data as Product[]);
+            }
+        };
+
+        fetchProducts();
+    }, []);
 
     return (
         <div className="pb-10 md:pb-20 animate-fade-in">
             {/* Hero Section Natural */}
             <div className="relative min-h-[85vh] md:h-[85vh] w-full flex items-center justify-center overflow-hidden bg-myn-dark py-20 md:py-0">
-                
+
                 {/* Background Image - Absolute Positioning */}
                 <div className="absolute inset-0 z-0">
-                    <img 
-                        src="https://i.imgur.com/1oKaPmJ.png" 
-                        className="w-full h-full object-cover opacity-80" 
-                        alt="Myn Coffee Roasters Banner" 
+                    <img
+                        src="https://i.imgur.com/1oKaPmJ.png"
+                        className="w-full h-full object-cover opacity-80"
+                        alt="Myn Coffee Roasters Banner"
                     />
                     {/* Gradient Overlay for text readability */}
                     <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-myn-dark/95"></div>
@@ -45,13 +62,13 @@ const HomeView: React.FC<HomeViewProps> = ({ setView, addToCart }) => {
                             Ofrecemos café de especialidad de origen.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center px-6">
-                            <button 
-                                onClick={() => setView('shop')} 
+                            <button
+                                onClick={() => setView('shop')}
                                 className="w-full sm:w-auto px-10 py-4 bg-myn-primary hover:bg-myn-dark text-white text-sm uppercase tracking-widest font-bold transition-all border border-transparent hover:border-myn-light rounded-sm shadow-2xl transform hover:-translate-y-0.5"
                             >
                                 Ver Catálogo
                             </button>
-                            <button 
+                            <button
                                 className="w-full sm:w-auto px-10 py-4 bg-transparent border border-white/30 hover:bg-white/10 text-white text-sm uppercase tracking-widest font-bold transition-all backdrop-blur-sm rounded-sm"
                             >
                                 Conócenos
@@ -89,11 +106,11 @@ const HomeView: React.FC<HomeViewProps> = ({ setView, addToCart }) => {
                     <h2 className="text-3xl md:text-4xl font-serif text-myn-dark mt-2">Favoritos de la Semana</h2>
                     <div className="w-16 h-0.5 bg-myn-primary mx-auto mt-4 rounded-full"></div>
                 </div>
-                
+
                 <div className="grid md:grid-cols-3 gap-6 md:gap-8">
                     {featuredProducts.map(product => (
                         <div key={product.id} className="group relative bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col">
-                             {/* Image */}
+                            {/* Image */}
                             <div className="h-64 md:h-72 overflow-hidden relative">
                                 <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                                 <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-myn-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 shadow-sm border border-myn-light">
@@ -101,7 +118,7 @@ const HomeView: React.FC<HomeViewProps> = ({ setView, addToCart }) => {
                                 </div>
                                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors"></div>
                             </div>
-                            
+
                             {/* Content */}
                             <div className="p-5 md:p-6 flex-1 flex flex-col">
                                 <div className="text-xs text-myn-primary font-bold uppercase tracking-wider mb-2">{product.origin}</div>
@@ -113,7 +130,7 @@ const HomeView: React.FC<HomeViewProps> = ({ setView, addToCart }) => {
                                 </div>
                                 <div className="flex items-center justify-between pt-4 border-t border-gray-50 mt-auto">
                                     <span className="font-serif text-lg font-bold text-myn-dark">${product.price.toLocaleString('es-CL')}</span>
-                                    <button 
+                                    <button
                                         onClick={() => addToCart(product)}
                                         className="w-10 h-10 rounded-full bg-myn-sand/50 flex items-center justify-center text-myn-dark hover:bg-myn-dark hover:text-white transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105"
                                         title="Añadir al carrito"
@@ -125,10 +142,10 @@ const HomeView: React.FC<HomeViewProps> = ({ setView, addToCart }) => {
                         </div>
                     ))}
                 </div>
-                
+
                 <div className="text-center mt-10 md:mt-12">
-                    <button 
-                        onClick={() => setView('shop')} 
+                    <button
+                        onClick={() => setView('shop')}
                         className="inline-flex items-center gap-2 text-myn-dark text-sm font-bold border-b-2 border-myn-primary pb-1 hover:text-myn-primary transition-colors uppercase tracking-wider"
                     >
                         Ver todos los cafés <ArrowRight size={16} />
