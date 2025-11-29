@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Product, QuizAnswers } from '../types';
 import { supabase } from '../supabaseClient';
 import { QUIZ_STEPS } from '../constants';
+import { Link } from 'react-router-dom';
 import { Leaf, ArrowRight, Check, RefreshCw } from 'lucide-react';
 
 interface CoffeeQuizProps {
@@ -141,12 +142,20 @@ const CoffeeQuiz: React.FC<CoffeeQuizProps> = ({ addToCart }) => {
 
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         {recommendedProduct && (
-                            <button
-                                onClick={() => addToCart(recommendedProduct)}
-                                className="px-10 py-4 bg-myn-dark text-white rounded-lg hover:bg-myn-primary transition-colors font-bold uppercase tracking-wider shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center gap-2"
-                            >
-                                Añadir al Carrito
-                            </button>
+                            <>
+                                <Link
+                                    to={`/product/${recommendedProduct.id}`}
+                                    className="px-10 py-4 bg-myn-primary text-white rounded-lg hover:bg-myn-dark transition-colors font-bold uppercase tracking-wider shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center gap-2"
+                                >
+                                    Ver Detalles
+                                </Link>
+                                <button
+                                    onClick={() => addToCart(recommendedProduct)}
+                                    className="px-10 py-4 bg-myn-dark text-white rounded-lg hover:bg-myn-primary transition-colors font-bold uppercase tracking-wider shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center gap-2"
+                                >
+                                    Añadir al Carrito
+                                </button>
+                            </>
                         )}
                         <button
                             onClick={resetQuiz}

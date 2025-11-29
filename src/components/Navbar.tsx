@@ -2,16 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Menu, X, ShoppingBag, User } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 
-interface NavbarProps {
-    cartCount: number;
-}
-
-const Navbar: React.FC<NavbarProps> = ({ cartCount }) => {
+const Navbar: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const location = useLocation();
     const { user } = useAuth();
+    const { itemCount, openCart } = useCart();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -58,11 +56,14 @@ const Navbar: React.FC<NavbarProps> = ({ cartCount }) => {
                             <User size={20} />
                             {user && <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full"></span>}
                         </Link>
-                        <button className="relative text-myn-dark hover:text-myn-primary transition-colors cursor-pointer">
-                            <ShoppingBag size={20} />
-                            {cartCount > 0 && (
-                                <span className="absolute -top-2 -right-2 bg-myn-primary text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
-                                    {cartCount}
+                        <button
+                            onClick={openCart}
+                            className="relative p-2 hover:bg-myn-sand/30 rounded-lg transition-colors"
+                        >
+                            <ShoppingBag size={22} className="text-myn-dark" />
+                            {itemCount > 0 && (
+                                <span className="absolute -top-1 -right-1 bg-myn-primary text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                    {itemCount}
                                 </span>
                             )}
                         </button>
@@ -96,12 +97,18 @@ const Navbar: React.FC<NavbarProps> = ({ cartCount }) => {
                                 <User size={24} />
                                 <span className="text-xs uppercase tracking-widest">{user ? 'Mi Cuenta' : 'Login'}</span>
                             </Link>
-                            <button className="flex flex-col items-center gap-2 text-myn-dark cursor-pointer">
+                            <button
+                                onClick={() => {
+                                    setIsOpen(false);
+                                    openCart();
+                                }}
+                                className="flex flex-col items-center gap-2 text-myn-dark cursor-pointer"
+                            >
                                 <div className="relative">
                                     <ShoppingBag size={24} />
-                                    {cartCount > 0 && (
+                                    {itemCount > 0 && (
                                         <span className="absolute -top-2 -right-2 bg-myn-primary text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
-                                            {cartCount}
+                                            {itemCount}
                                         </span>
                                     )}
                                 </div>

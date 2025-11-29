@@ -1,6 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { ViewState, Product } from '../types';
+import { Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import CoffeeQuiz from '../components/CoffeeQuiz';
 import { Star, ArrowRight, ShoppingCart } from 'lucide-react';
@@ -110,35 +110,40 @@ const HomeView: React.FC<HomeViewProps> = ({ setView, addToCart }) => {
                 <div className="grid md:grid-cols-3 gap-6 md:gap-8">
                     {featuredProducts.map(product => (
                         <div key={product.id} className="group relative bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col">
-                            {/* Image */}
-                            <div className="h-64 md:h-72 overflow-hidden relative">
-                                <img src={product.image_url} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                                <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-myn-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 shadow-sm border border-myn-light">
-                                    <Star size={10} fill="currentColor" /> Destacado
+                            <Link to={`/product/${product.id}`} className="block">
+                                {/* Image */}
+                                <div className="h-64 md:h-72 overflow-hidden relative">
+                                    <img src={product.image_url} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                                    <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-myn-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 shadow-sm border border-myn-light">
+                                        <Star size={10} fill="currentColor" /> Destacado
+                                    </div>
+                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors"></div>
                                 </div>
-                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors"></div>
-                            </div>
 
-                            {/* Content */}
-                            <div className="p-5 md:p-6 flex-1 flex flex-col">
-                                <div className="text-xs text-myn-primary font-bold uppercase tracking-wider mb-2">{product.origin}</div>
-                                <h3 className="text-xl font-serif font-bold text-myn-dark mb-3 group-hover:text-myn-primary transition-colors">{product.name}</h3>
-                                <div className="flex flex-wrap gap-2 mb-6">
-                                    {(product.tags || []).map(tag => (
-                                        <span key={tag} className="text-[10px] font-medium bg-myn-sand/50 px-2 py-1 rounded-md text-gray-600 border border-transparent group-hover:border-myn-light transition-colors">{tag}</span>
-                                    ))}
+                                {/* Content */}
+                                <div className="p-5 md:p-6 flex-1 flex flex-col">
+                                    <div className="text-xs text-myn-primary font-bold uppercase tracking-wider mb-2">{product.origin}</div>
+                                    <h3 className="text-xl font-serif font-bold text-myn-dark mb-3 group-hover:text-myn-primary transition-colors">{product.name}</h3>
+                                    <div className="flex flex-wrap gap-2 mb-6">
+                                        {(product.tags || []).map(tag => (
+                                            <span key={tag} className="text-[10px] font-medium bg-myn-sand/50 px-2 py-1 rounded-md text-gray-600 border border-transparent group-hover:border-myn-light transition-colors">{tag}</span>
+                                        ))}
+                                    </div>
+                                    <div className="flex items-center justify-between pt-4 border-t border-gray-50 mt-auto">
+                                        <span className="font-serif text-lg font-bold text-myn-dark">${product.price.toLocaleString('es-CL')}</span>
+                                        <button
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                addToCart(product);
+                                            }}
+                                            className="w-10 h-10 rounded-full bg-myn-sand/50 flex items-center justify-center text-myn-dark hover:bg-myn-dark hover:text-white transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105"
+                                            title="Añadir al carrito"
+                                        >
+                                            <ShoppingCart size={18} />
+                                        </button>
+                                    </div>
                                 </div>
-                                <div className="flex items-center justify-between pt-4 border-t border-gray-50 mt-auto">
-                                    <span className="font-serif text-lg font-bold text-myn-dark">${product.price.toLocaleString('es-CL')}</span>
-                                    <button
-                                        onClick={() => addToCart(product)}
-                                        className="w-10 h-10 rounded-full bg-myn-sand/50 flex items-center justify-center text-myn-dark hover:bg-myn-dark hover:text-white transition-all duration-300 shadow-sm hover:shadow-md transform hover:scale-105"
-                                        title="Añadir al carrito"
-                                    >
-                                        <ShoppingCart size={18} />
-                                    </button>
-                                </div>
-                            </div>
+                            </Link>
                         </div>
                     ))}
                 </div>
