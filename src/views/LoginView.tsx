@@ -59,9 +59,11 @@ const LoginView: React.FC = () => {
                     return;
                 }
 
-                const { error } = await supabase.auth.signUp({
+                // 1. Create Auth User
+                const { data: authData, error: authError } = await supabase.auth.signUp({
                     email,
                     password,
+                    // Metadata is kept for reference, but not relied upon for profile creation
                     options: {
                         data: {
                             first_name: firstName,
@@ -71,13 +73,40 @@ const LoginView: React.FC = () => {
                             commune: selectedCommune.name,
                             street_address: streetAddress,
                             full_name: `${firstName} ${lastName}`,
-                            avatar_url: `https://ui-avatars.com/api/?name=${firstName}+${lastName}&background=random`
                         }
                     }
                 });
-                if (error) throw error;
-                showToast('✅ Registro exitoso. ¡Bienvenido!');
-                navigate('/dashboard');
+
+                if (authError) throw authError;
+
+                if (authData.user) {
+                    // 2. DIRECTLY INSERT PROFILE - Bypassing Triggers
+                    // Because we enabled INSERT policy for users, this is now allowed and safe
+                    const { error: profileError } = await supabase.from('profiles').insert({
+                        id: authData.user.id,
+                        email: email,
+                        first_name: firstName,
+                        last_name: lastName,
+                        full_name: `${firstName} ${lastName}`,
+                        phone: phone,
+                        region: selectedRegion.name,
+                        commune: selectedCommune.name,
+                        street_address: streetAddress,
+                        role: 'user',
+                        avatar_url: `https://ui-avatars.com/api/?name=${firstName}+${lastName}&background=random`
+                    });
+
+                    // Handle case where profile might already exist (rare edge case, or if trigger still fired)
+                    if (profileError && profileError.code !== '23505') { // 23505 is unique violation
+                        console.error('Profile creation error:', profileError);
+                        // Non-blocking error? Maybe show warning but let them proceed if auth worked
+                        showToast('⚠️ Cuenta creada, pero hubo un error guardando el perfil.');
+                    } else {
+                        showToast('✅ Registro exitoso. ¡Bienvenido!');
+                    }
+                    
+                    navigate('/dashboard');
+                }
             }
         } catch (error: any) {
             console.error('Auth error:', error);

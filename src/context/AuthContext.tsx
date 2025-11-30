@@ -26,7 +26,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setSession(session);
             setUser(session?.user ?? null);
             if (session?.user) {
-                fetchProfileWithRetry(session.user.id);
+                fetchProfile(session.user.id);
             } else {
                 setLoading(false);
             }
@@ -37,7 +37,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setSession(session);
             setUser(session?.user ?? null);
             if (session?.user) {
-                fetchProfileWithRetry(session.user.id);
+                fetchProfile(session.user.id);
             } else {
                 setProfile(null);
                 setLoading(false);
@@ -47,37 +47,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return () => subscription.unsubscribe();
     }, []);
 
-    const fetchProfileWithRetry = async (userId: string, retries = 3, delay = 500) => {
-        for (let i = 0; i < retries; i++) {
-            try {
-                const { data, error } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('id', userId)
-                    .maybeSingle();
+    const fetchProfile = async (userId: string) => {
+        try {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', userId)
+                .maybeSingle();
 
-                if (error) {
-                    console.error('Error fetching profile:', error);
-                } else if (data) {
-                    setProfile(data);
-                    setLoading(false);
-                    return; // Success
-                } else {
-                    console.warn(`Profile not found for user: ${userId}. Attempt ${i + 1} of ${retries}`);
-                }
-            } catch (error) {
-                console.error('Error:', error);
+            if (error) {
+                console.error('Error fetching profile:', error);
+            } else {
+                setProfile(data);
             }
-            // Wait before retrying
-            if (i < retries - 1) await new Promise(res => setTimeout(res, delay));
+        } catch (error) {
+            console.error('Error:', error);
+        } finally {
+            setLoading(false);
         }
-        
-        // If we ran out of retries
-        console.error('Failed to load profile after retries');
-        // IMPORTANT: Do NOT set a "fake" profile if real one failed to load.
-        // Let the UI show a loading state or handle null profile gracefully.
-        // setProfile({ id: userId, role: 'user' }); // Removed fallback causing stale data issues
-        setLoading(false);
     };
 
     const signOut = async () => {
@@ -86,7 +73,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const refreshProfile = async () => {
         if (user) {
-            await fetchProfileWithRetry(user.id);
+            await fetchProfile(user.id);
         }
     };
 
