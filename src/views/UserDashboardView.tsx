@@ -8,7 +8,7 @@ import { useToast } from '../context/ToastContext';
 import { getRegions, getCommunesByRegion, Region, Commune } from '../services/chileanAddressService';
 
 const UserDashboardView: React.FC = () => {
-    const { user, profile, isAdmin, signOut } = useAuth();
+    const { user, profile, isAdmin, signOut, refreshProfile } = useAuth();
     const [recommendedProducts, setRecommendedProducts] = useState<Product[]>([]);
     const [isEditing, setIsEditing] = useState(false);
     const [editForm, setEditForm] = useState({
@@ -42,6 +42,13 @@ const UserDashboardView: React.FC = () => {
 
         fetchRecommendations();
     }, []);
+
+    // FORCE RELOAD PROFILE ON MOUNT TO ENSURE FRESH DATA
+    useEffect(() => {
+        if (user?.id) {
+            refreshProfile();
+        }
+    }, [user?.id]);
 
     useEffect(() => {
         if (profile) {
@@ -87,8 +94,8 @@ const UserDashboardView: React.FC = () => {
             if (error) throw error;
             showToast('✅ Perfil actualizado correctamente');
             setIsEditing(false);
-            // Force reload or wait for realtime update? Profile context should update if it listens to changes
-            // For now, manual refresh could be needed or context update logic
+            // Force reload profile context
+            await refreshProfile();
         } catch (error: any) {
             showToast(`❌ Error: ${error.message}`);
         } finally {
