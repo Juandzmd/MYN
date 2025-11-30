@@ -48,16 +48,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const fetchProfile = async (userId: string) => {
         try {
+            // Use maybeSingle to avoid error if profile doesn't exist yet (though trigger should create it)
             const { data, error } = await supabase
                 .from('profiles')
                 .select('*')
                 .eq('id', userId)
-                .single();
+                .maybeSingle();
 
             if (error) {
                 console.error('Error fetching profile:', error);
-            } else {
+            } else if (data) {
                 setProfile(data);
+            } else {
+                // Fallback: If no profile, set minimal user data
+                console.warn('Profile not found for user:', userId);
+                setProfile({ id: userId, role: 'user' });
             }
         } catch (error) {
             console.error('Error:', error);

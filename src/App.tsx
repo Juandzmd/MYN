@@ -11,6 +11,8 @@ import ProductDetailView from './views/ProductDetailView';
 import WholesaleView from './views/WholesaleView';
 import AdminView from './views/AdminView';
 import LoginView from './views/LoginView';
+import ForgotPasswordView from './views/ForgotPasswordView';
+import ResetPasswordView from './views/ResetPasswordView';
 import UserDashboardView from './views/UserDashboardView';
 import CheckoutView from './views/CheckoutView';
 import PaymentConfirmationView from './views/PaymentConfirmationView';
@@ -42,6 +44,8 @@ const AppContent: React.FC = () => {
                     <Route path="/wholesale" element={<WholesaleView />} />
                     <Route path="/guides" element={<GuidesView />} />
                     <Route path="/login" element={<LoginView />} />
+                    <Route path="/forgot-password" element={<ForgotPasswordView />} />
+                    <Route path="/reset-password" element={<ResetPasswordView />} />
 
                     {/* Payment Routes */}
                     <Route path="/payment/confirmation" element={<PaymentConfirmationView />} />

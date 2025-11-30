@@ -281,6 +281,13 @@ const LoginView: React.FC = () => {
                         >
                             {isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia Sesión'}
                         </button>
+                        {isLogin && (
+                            <div className="mt-2">
+                                <a href="/#/forgot-password" className="text-gray-500 hover:text-myn-primary text-xs transition-colors">
+                                    ¿Olvidaste tu contraseña?
+                                </a>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
