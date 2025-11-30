@@ -227,7 +227,11 @@ const UserDashboardView: React.FC = () => {
                             <div className="space-y-4">
                                 <div>
                                     <p className="text-xs text-gray-400 uppercase font-bold">Nombre</p>
-                                    <p className="font-medium text-gray-800">{profile?.first_name} {profile?.last_name}</p>
+                                    <p className="font-medium text-gray-800">
+                                        {profile?.first_name && profile?.last_name 
+                                            ? `${profile.first_name} ${profile.last_name}` 
+                                            : profile?.full_name || 'Usuario'}
+                                    </p>
                                 </div>
                                 <div>
                                     <p className="text-xs text-gray-400 uppercase font-bold">Email</p>
@@ -240,9 +244,13 @@ const UserDashboardView: React.FC = () => {
                                 <div>
                                     <p className="text-xs text-gray-400 uppercase font-bold">Dirección</p>
                                     <p className="font-medium text-gray-800">
-                                        {profile?.street_address ? `${profile.street_address}, ${profile.commune}` : '-'}
+                                        {profile?.street_address ? profile.street_address : '-'}
                                     </p>
-                                    <p className="text-xs text-gray-500">{profile?.region}</p>
+                                    {profile?.region && (
+                                        <p className="text-xs text-gray-500">
+                                            {profile.commune ? `${profile.commune}, ` : ''}{profile.region}
+                                        </p>
+                                    )}
                                 </div>
                                 
                                 <div className="pt-4 border-t border-gray-100 mt-4">
