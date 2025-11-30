@@ -24,7 +24,7 @@ interface Order {
 }
 
 const UserDashboardView: React.FC = () => {
-    const { user, profile, isAdmin, signOut, refreshProfile } = useAuth();
+    const { user, profile, isAdmin, signOut, refreshProfile, loading: authLoading } = useAuth();
     const [recommendedProducts, setRecommendedProducts] = useState<Product[]>([]);
     const [orders, setOrders] = useState<Order[]>([]);
     const [isEditing, setIsEditing] = useState(false);
@@ -90,6 +90,14 @@ const UserDashboardView: React.FC = () => {
             refreshProfile();
         }
     }, [user?.id]);
+
+    // Force edit mode if profile is missing
+    useEffect(() => {
+        if (!authLoading && !profile && user) {
+            setIsEditing(true);
+            showToast('⚠️ Por favor completa tu perfil para continuar');
+        }
+    }, [authLoading, profile, user]);
 
     useEffect(() => {
         if (profile) {
@@ -184,6 +192,14 @@ const UserDashboardView: React.FC = () => {
             default: return status;
         }
     };
+
+    if (authLoading) {
+        return (
+            <div className="min-h-screen bg-myn-cream flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-myn-primary"></div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-myn-cream pt-24 pb-12 px-4">
