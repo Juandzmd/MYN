@@ -1,15 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { ShoppingBag, Coffee, Star, LogOut, LayoutDashboard, User, Edit2, Save, X, Lock } from 'lucide-react';
+import { ShoppingBag, Coffee, Star, LogOut, LayoutDashboard, User, Edit2, Save, X, Lock, Package, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { Product } from '../types';
 import { useToast } from '../context/ToastContext';
 import { getRegions, getCommunesByRegion, Region, Commune } from '../services/chileanAddressService';
 
+interface OrderItem {
+    id: string;
+    product_name: string;
+    quantity: number;
+    unit_price: number;
+    product_image: string;
+}
+
+interface Order {
+    id: string;
+    created_at: string;
+    total: number;
+    status: string;
+    order_items: OrderItem[];
+}
+
 const UserDashboardView: React.FC = () => {
     const { user, profile, isAdmin, signOut, refreshProfile } = useAuth();
     const [recommendedProducts, setRecommendedProducts] = useState<Product[]>([]);
+    const [orders, setOrders] = useState<Order[]>([]);
     const [isEditing, setIsEditing] = useState(false);
     const [editForm, setEditForm] = useState({
         phone: '',
@@ -42,6 +59,30 @@ const UserDashboardView: React.FC = () => {
 
         fetchRecommendations();
     }, []);
+
+    // Fetch Orders
+    useEffect(() => {
+        const fetchOrders = async () => {
+            if (!user?.id) return;
+
+            const { data, error } = await supabase
+                .from('orders')
+                .select(`
+                    *,
+                    order_items (*)
+                `)
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('Error fetching orders:', error);
+            } else if (data) {
+                setOrders(data);
+            }
+        };
+
+        fetchOrders();
+    }, [user?.id]);
 
     // FORCE RELOAD PROFILE ON MOUNT TO ENSURE FRESH DATA
     useEffect(() => {
@@ -118,6 +159,32 @@ const UserDashboardView: React.FC = () => {
         setEditForm({ ...editForm, commune: commune?.name || '' });
     };
 
+    const formatDate = (dateString: string) => {
+        return new Date(dateString).toLocaleDateString('es-CL', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    };
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'completed': return 'bg-green-100 text-green-800';
+            case 'pending': return 'bg-yellow-100 text-yellow-800';
+            case 'cancelled': return 'bg-red-100 text-red-800';
+            default: return 'bg-gray-100 text-gray-800';
+        }
+    };
+
+    const getStatusLabel = (status: string) => {
+        switch (status) {
+            case 'completed': return 'Completado';
+            case 'pending': return 'Pendiente';
+            case 'cancelled': return 'Cancelado';
+            default: return status;
+        }
+    };
+
     return (
         <div className="min-h-screen bg-myn-cream pt-24 pb-12 px-4">
             <div className="max-w-6xl mx-auto">
@@ -161,7 +228,7 @@ const UserDashboardView: React.FC = () => {
                                 <User className="text-myn-primary" size={20} /> Tu Perfil
                             </h3>
                             {!isEditing && (
-                                <button 
+                                <button
                                     onClick={() => setIsEditing(true)}
                                     className="text-sm text-myn-primary font-bold hover:underline flex items-center gap-1"
                                 >
@@ -174,16 +241,16 @@ const UserDashboardView: React.FC = () => {
                             <form onSubmit={handleUpdateProfile} className="space-y-4 animate-fade-in">
                                 <div>
                                     <label className="block text-xs text-gray-500 font-bold uppercase mb-1">Teléfono</label>
-                                    <input 
-                                        type="text" 
+                                    <input
+                                        type="text"
                                         value={editForm.phone}
-                                        onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
+                                        onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
                                         className="w-full p-2 border border-gray-200 rounded focus:border-myn-primary outline-none text-sm"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-xs text-gray-500 font-bold uppercase mb-1">Región</label>
-                                    <select 
+                                    <select
                                         value={selectedRegion?.code || ''}
                                         onChange={handleRegionChange}
                                         className="w-full p-2 border border-gray-200 rounded focus:border-myn-primary outline-none text-sm bg-white"
@@ -194,7 +261,7 @@ const UserDashboardView: React.FC = () => {
                                 </div>
                                 <div>
                                     <label className="block text-xs text-gray-500 font-bold uppercase mb-1">Comuna</label>
-                                    <select 
+                                    <select
                                         value={selectedCommune?.code || ''}
                                         onChange={handleCommuneChange}
                                         disabled={!selectedRegion}
@@ -206,23 +273,23 @@ const UserDashboardView: React.FC = () => {
                                 </div>
                                 <div>
                                     <label className="block text-xs text-gray-500 font-bold uppercase mb-1">Dirección</label>
-                                    <input 
-                                        type="text" 
+                                    <input
+                                        type="text"
                                         value={editForm.street_address}
-                                        onChange={(e) => setEditForm({...editForm, street_address: e.target.value})}
+                                        onChange={(e) => setEditForm({ ...editForm, street_address: e.target.value })}
                                         className="w-full p-2 border border-gray-200 rounded focus:border-myn-primary outline-none text-sm"
                                     />
                                 </div>
                                 <div className="flex gap-2 pt-2">
-                                    <button 
-                                        type="submit" 
+                                    <button
+                                        type="submit"
                                         disabled={loading}
                                         className="flex-1 bg-myn-dark text-white py-2 rounded text-sm font-bold flex items-center justify-center gap-1"
                                     >
                                         <Save size={14} /> Guardar
                                     </button>
-                                    <button 
-                                        type="button" 
+                                    <button
+                                        type="button"
                                         onClick={() => setIsEditing(false)}
                                         className="flex-1 bg-gray-100 text-gray-700 py-2 rounded text-sm font-bold flex items-center justify-center gap-1"
                                     >
@@ -235,8 +302,8 @@ const UserDashboardView: React.FC = () => {
                                 <div>
                                     <p className="text-xs text-gray-400 uppercase font-bold">Nombre</p>
                                     <p className="font-medium text-gray-800">
-                                        {profile?.first_name && profile?.last_name 
-                                            ? `${profile.first_name} ${profile.last_name}` 
+                                        {profile?.first_name && profile?.last_name
+                                            ? `${profile.first_name} ${profile.last_name}`
                                             : profile?.full_name || 'Usuario'}
                                     </p>
                                 </div>
@@ -259,10 +326,10 @@ const UserDashboardView: React.FC = () => {
                                         </p>
                                     )}
                                 </div>
-                                
+
                                 <div className="pt-4 border-t border-gray-100 mt-4">
-                                    <Link 
-                                        to="/reset-password" 
+                                    <Link
+                                        to="/reset-password"
                                         className="w-full py-2 border border-myn-primary text-myn-primary rounded-lg font-bold text-sm flex items-center justify-center gap-2 hover:bg-myn-primary hover:text-white transition-colors"
                                     >
                                         <Lock size={14} /> Cambiar Contraseña
@@ -299,12 +366,47 @@ const UserDashboardView: React.FC = () => {
                             <ShoppingBag className="text-myn-primary" size={20} /> Historial de Pedidos
                         </h3>
 
-                        <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                            <ShoppingBag size={48} className="mx-auto text-gray-300 mb-3" />
-                            <p className="text-gray-500 font-medium">Aún no has realizado pedidos</p>
-                            <p className="text-sm text-gray-400 mb-4">¡Descubre nuestros orígenes únicos!</p>
-                            <Link to="/shop" className="text-myn-primary font-bold hover:underline">Ir a la Tienda</Link>
-                        </div>
+                        {orders.length > 0 ? (
+                            <div className="space-y-4">
+                                {orders.map((order) => (
+                                    <div key={order.id} className="border border-gray-100 rounded-xl p-4 hover:shadow-md transition-shadow">
+                                        <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-4 pb-4 border-b border-gray-50">
+                                            <div>
+                                                <p className="text-xs text-gray-400 uppercase font-bold">Pedido #{order.id.slice(0, 8)}</p>
+                                                <p className="text-sm text-gray-600">{formatDate(order.created_at)}</p>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${getStatusColor(order.status)}`}>
+                                                    {getStatusLabel(order.status)}
+                                                </span>
+                                                <p className="font-bold text-myn-dark">${order.total.toLocaleString('es-CL')}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            {order.order_items?.map((item) => (
+                                                <div key={item.id} className="flex items-center gap-4">
+                                                    <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden shrink-0">
+                                                        <img src={item.product_image} alt={item.product_name} className="w-full h-full object-cover" />
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <p className="text-sm font-bold text-gray-800">{item.product_name}</p>
+                                                        <p className="text-xs text-gray-500">Cant: {item.quantity} x ${item.unit_price.toLocaleString('es-CL')}</p>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                                <ShoppingBag size={48} className="mx-auto text-gray-300 mb-3" />
+                                <p className="text-gray-500 font-medium">Aún no has realizado pedidos</p>
+                                <p className="text-sm text-gray-400 mb-4">¡Descubre nuestros orígenes únicos!</p>
+                                <Link to="/shop" className="text-myn-primary font-bold hover:underline">Ir a la Tienda</Link>
+                            </div>
+                        )}
                     </div>
 
                     {/* Suggestions */}
