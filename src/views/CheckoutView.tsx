@@ -119,14 +119,18 @@ const CheckoutView: React.FC = () => {
 
             // Create Flow payment
             const baseUrl = window.location.origin + import.meta.env.BASE_URL;
+            // Use Hash based URLs for GitHub Pages compatibility
+            const urlConfirmation = `${baseUrl}#/payment/confirmation`;
+            const urlReturn = `${baseUrl}#/payment/return`;
+
             const flowResponse = await createFlowPayment({
                 commerceOrder,
                 subject: `Orden MYN Coffee #${commerceOrder}`,
                 currency: 'CLP',
                 amount: Math.round(finalTotal),
                 email: shippingData.email,
-                urlConfirmation: `${baseUrl}payment/confirmation`,
-                urlReturn: `${baseUrl}payment/return`,
+                urlConfirmation: urlConfirmation,
+                urlReturn: urlReturn,
                 optional: JSON.stringify({ orderId: orderData.id }),
             });
 
